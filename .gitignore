@@ -1,0 +1,30 @@
+# Node.js dependencies
+/node_modules/
+
+# Environment variable files that may contain sensitive data like passwords
+/.env
+/.env.local
+/.env.* # Matches .env.production, .env.development, etc.
+
+# Log files
+/logs
+*.log
+
+# MongoDB backups
+/mongodb_backup.tar.gz
+
+# npm debug log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS-specific files
+.DS_Store  # macOS
+Thumbs.db  # Windows
+
+# .vscode or IDE-specific files
+.vscode/
+
+# Temporary build files
+/dist/
+/build/

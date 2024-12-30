@@ -1,7 +1,7 @@
-#**Chattify**
+# **Chattify**
 Chattify is a feature-rich chat application that enables real-time communication. The app offers functionalities such as messaging, multimedia sharing, user authentication, and threaded conversations. This README file provides a detailed explanation of the project, including how to set it up, the purpose of each function, and how it works. 
 ________________________________________
-#**Contents**
+# **Contents**
 	Features
 	Project Structure
 	Setup Instructions
@@ -10,14 +10,14 @@ ________________________________________
 	Running the Application
 	Testing
 ________________________________________
-#**Features**
+# **Features**
 	User Authentication: Secure login and registration using JWT.
 	Real-time Messaging: Instant communication using Socket.IO.
 	Multimedia Sharing: Support for image and file uploads.
 	Threaded Conversations: Organized message threads for better communication.
 	Cloud Storage: Images and files are stored in Cloudinary.
 ________________________________________
-#**Project Structure**
+# **Project Structure**
 Chattify/
 ├── backend/
 │   ├── config/
@@ -44,7 +44,7 @@ Chattify/
 │   └── package.json
 └── README.md
 ________________________________________
-#**Setup Instructions**
+# **Setup Instructions**
 	Prerequisites
 	Node.js: Version 20 or higher
 	MongoDB: Version 6 or higher
@@ -70,14 +70,14 @@ ________________________________________
 17.	npm install
 18.	npm start
 ________________________________________
-#**Environment Variables**
+# **Environment Variables**
 Here are the environment variables required to run the project:
 	MONGO_URI: MongoDB connection string.
 	JWT_SECRET: Secret key for JSON Web Tokens.
 	CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET: Cloudinary credentials for file storage.
 ________________________________________
 
-#**Detailed Explanation of Functions**
+# **Detailed Explanation of Functions**
 **Backend**
 
 **1. Database Connection (config/db.js)**
@@ -145,7 +145,7 @@ ________________________________________
 	  });
 	});
 ________________________________________
-#**Running the Application**
+# **Running the Application**
 	Start the backend server:
 	cd backend
 	node server.js
@@ -154,7 +154,7 @@ ________________________________________
 	npm start
 	Open the app in a browser at http://localhost:3000.
 ________________________________________
-#**Testing**
+# **Testing**
 	Use jest and supertest for backend testing.
 	Run tests: 
 	npm test

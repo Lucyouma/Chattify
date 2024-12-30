@@ -37,7 +37,18 @@ const storage = new CloudinaryStorage({
   },
 });
 
-const upload = multer({ storage });
+// Multer upload configuration with file type validation and size limit (e.g., 10MB)
+const upload = multer({
+  storage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // Limit file size to 10MB
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/') || file.mimetype.startsWith('application/')) {
+      cb(null, true); // Accept image, video, and document files
+    } else {
+      cb(new Error('Only image, video, and document files are allowed!'), false);
+    }
+  },
+});
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -46,7 +57,7 @@ app.use('/api/chat', chatRoutes);
 // Endpoint to handle multimedia uploads
 app.post('/api/upload', upload.single('file'), (req, res) => {
   try {
-    res.status(200).json({ 
+    res.status(200).json({
       url: req.file.path, // Cloudinary URL
       public_id: req.file.filename // File identifier in Cloudinary
     });
@@ -59,7 +70,7 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: '*',
+    origin: 'localhost:3000', // Actual frontend URL
     methods: ['GET', 'POST'],
   },
 });
@@ -71,7 +82,8 @@ io.on('connection', (socket) => {
   // Listen for incoming messages
   socket.on('sendMessage', (message) => {
     console.log('Message received:', message);
-    socket.broadcast.emit('receiveMessage', message); // Broadcast message to other clients
+    socket.broadcast.emit('receiveMessage', message); // Broadcast message to others
+    socket.emit('messageStatus', { status: 'delivered' }); // Acknowledge message delivery to the sender
   });
 
   // Handle disconnection

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { connectSocket, sendMessage, listenForMessages, disconnectSocket } from '../socket'; // Correct import
-import axios from '../utils/axios';
+import { connectSocket, sendMessage, listenForMessages, disconnectSocket } from '../socket'; // Adjust the path to where your socket utility file is located
+import axios from '../utils/axios'; // Assuming this is a custom axios instance with your base URL configured
 
 function Chat() {
   const [messages, setMessages] = useState([]);
@@ -10,21 +10,21 @@ function Chat() {
   const senderId = "123"; // Replace with actual sender ID
   const receiverId = "456"; // Replace with actual receiver ID
 
-  // Get messages between users when component mounts
+  // Fetch messages between users when component mounts
   useEffect(() => {
     const fetchMessages = async () => {
       try {
         const response = await axios.get(`/chat/${senderId}/${receiverId}`);
         setMessages(response.data);
       } catch (err) {
-        console.error(err.message);
+        console.error('Error fetching messages:', err.message);
       }
     };
 
     fetchMessages();
-    
-    // Establish socket connection and start listening for messages
-    connectSocket(); 
+
+    // Establish socket connection and listen for messages
+    connectSocket();
     listenForMessages((newMessage) => {
       setMessages((prevMessages) => [...prevMessages, newMessage]);
     });
@@ -42,7 +42,7 @@ function Chat() {
     formData.append('senderId', senderId);
     formData.append('receiverId', receiverId);
     formData.append('content', message);
-    
+
     if (file) {
       formData.append('file', file);
     }
@@ -58,7 +58,7 @@ function Chat() {
       setMessage('');
       setFile(null);
     } catch (err) {
-      console.error(err.message);
+      console.error('Error sending message:', err.message);
     }
   };
 
@@ -69,10 +69,21 @@ function Chat() {
         {messages.map((msg, index) => (
           <div key={index}>
             <p><strong>{msg.senderId}</strong>: {msg.content}</p>
-            {msg.multimedia && <img src={msg.multimedia} alt="multimedia" width="100" />}
+            {msg.multimedia && (
+              <div>
+                {msg.multimedia.endsWith('.jpg') || msg.multimedia.endsWith('.png') || msg.multimedia.endsWith('.jpeg') ? (
+                  <img src={msg.multimedia} alt="multimedia" width="300" />
+                ) : (
+                  <a href={msg.multimedia} target="_blank" rel="noopener noreferrer">
+                    Download File
+                  </a>
+                )}
+              </div>
+            )}
           </div>
         ))}
       </div>
+
       <form onSubmit={handleSendMessage}>
         <textarea
           value={message}
@@ -88,4 +99,3 @@ function Chat() {
 }
 
 export default Chat;
-

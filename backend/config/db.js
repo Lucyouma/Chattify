@@ -5,8 +5,8 @@ const connectDB = async () => {
   try {
     // Attempt to connect to MongoDB using the URI stored in the .env file
     const conn = await mongoose.connect(process.env.MONGO_URI, {
-      useNewUrlParser: true,  // Enables the new MongoDB URI parser (recommended)
-      useUnifiedTopology: true,  // Enables the new connection management engine (recommended)
+      useNewUrlParser: true, // Enables the new MongoDB URI parser (recommended)
+      useUnifiedTopology: true, // Enables the new connection management engine (recommended)
     });
     console.log(`MongoDB connected: ${conn.connection.host}`);
   } catch (error) {

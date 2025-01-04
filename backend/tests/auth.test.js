@@ -1,7 +1,8 @@
 const request = require('supertest');
-const app = require('../server'); // Ensure this path points to my server file
+const app = require('../server'); // Ensure this path points to your server file
 const mongoose = require('mongoose');
 const User = require('../models/User');
+const bcrypt = require('bcryptjs'); // If you're using bcrypt for password hashing
 
 // Test database setup
 const testDatabaseUrl = process.env.TEST_DATABASE_URL || 'mongodb://127.0.0.1:27017/chattify_test';
@@ -48,7 +49,7 @@ describe('Authentication API Tests', () => {
 
   test('Should login an existing user', async () => {
     // Prepopulate the test database with a user
-    const passwordHash = await User.hashPassword('password123'); // Assuming hashPassword method exists
+    const passwordHash = await bcrypt.hash('password123', 10); // Hash password using bcrypt
     const user = new User({ email: 'testuser@example.com', password: passwordHash });
     await user.save();
 
@@ -62,7 +63,7 @@ describe('Authentication API Tests', () => {
 
   test('Should fail login with incorrect credentials', async () => {
     // Prepopulate the test database with a user
-    const passwordHash = await User.hashPassword('password123'); // Assuming hashPassword method exists
+    const passwordHash = await bcrypt.hash('password123', 10); // Hash password using bcrypt
     const user = new User({ email: 'testuser@example.com', password: passwordHash });
     await user.save();
 

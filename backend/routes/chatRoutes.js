@@ -7,7 +7,7 @@ const upload = require('../middleware/upload'); // Middleware for Cloudinary upl
 router.post('/send', async (req, res) => {
   try {
     const { senderId, receiverId, content } = req.body;
-    const message = await Message.create({ senderId, receiverId, content });
+    const message = await Message.create({ senderId, receiverId, content }); //save message in DB
     res.status(201).json(message);
   } catch (err) {
     res.status(500).json({ error: err.message });

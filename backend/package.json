@@ -1,11 +1,12 @@
 {
   "name": "chattify",
   "version": "1.0.0",
-  "description": "Chattify is a feature-rich chat application with messaging, sharing multimedia, and modular design.",
+  "description": "Chattify is a feature-rch chat application with messaging, sharing multimedia, and modular design.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "NODE_ENV=test jest",
+    "dev": "nodemon server.js"
   },
   "keywords": [
     "chat",
@@ -17,13 +18,14 @@
   "author": "Lucy Ouma",
   "license": "MIT",
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "bson": "^6.10.1",
     "cloudinary": "^1.41.3",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
-    "mongodb": "^6.12.0",
+    "mongodb": "6.12",
     "mongoose": "^8.9.2",
     "multer": "^1.4.5-lts.1",
     "multer-storage-cloudinary": "^4.0.0",
@@ -32,5 +34,12 @@
   "devDependencies": {
     "jest": "^29.7.0",
     "supertest": "^7.0.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testTimeout": 10000
+  },
+  "directories": {
+    "test": "tests"
   }
 }

@@ -8,6 +8,7 @@ const chatRoutes = require('./routes/chatRoutes');
 const multer = require('multer'); // For handling file uploads
 const cloudinary = require('cloudinary').v2; // Cloudinary integration
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cors = require('cors'); // CORS middleware
 
 // Load environment variables
 dotenv.config();
@@ -15,11 +16,23 @@ dotenv.config();
 // Initialize Express app
 const app = express();
 
+// Root route
+app.get('/', (req, res) => {
+  res.send('Welcome to Chattify Backend!');
+});
+
 // Middleware to parse JSON
 app.use(express.json());
+app.use(cors({
+  origin: 'http://localhost:3000', // Frontend URL
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true,
+}));
 
 // Connect to MongoDB
-connectDB();
+connectDB()
+  .then(() => console.log('MongoDB connection successful'))
+  .catch((err) => console.error('Error connecting to MongoDB:', err));
 
 // Configure Cloudinary
 cloudinary.config({
@@ -37,13 +50,13 @@ const storage = new CloudinaryStorage({
   },
 });
 
-// Multer upload configuration with file type validation and size limit (e.g., 10MB)
+// Multer upload configuration with file type validation and size limit
 const upload = multer({
   storage,
   limits: { fileSize: 10 * 1024 * 1024 }, // Limit file size to 10MB
   fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/') || file.mimetype.startsWith('application/')) {
-      cb(null, true); // Accept image, video, and document files
+    if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) { 
+      cb(null, true); // Accept image and video files
     } else {
       cb(new Error('Only image, video, and document files are allowed!'), false);
     }
@@ -59,7 +72,7 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
   try {
     res.status(200).json({
       url: req.file.path, // Cloudinary URL
-      public_id: req.file.filename // File identifier in Cloudinary
+      public_id: req.file.filename, // File identifier in Cloudinary
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -70,7 +83,7 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: 'localhost:3000', // Actual frontend URL
+    origin: 'http://localhost:3000', // Actual frontend URL
     methods: ['GET', 'POST'],
   },
 });
@@ -82,11 +95,12 @@ io.on('connection', (socket) => {
   // Listen for incoming messages
   socket.on('sendMessage', (message) => {
     console.log('Message received:', message);
-    socket.broadcast.emit('receiveMessage', message); // Broadcast message to others
-    socket.emit('messageStatus', { status: 'delivered' }); // Acknowledge message delivery to the sender
+    // Broadcast message to all connected users
+    io.emit('receiveMessage', message); // Broadcast message to all users
+    socket.emit('messageStatus', { status: 'delivered' }); // Acknowledge message delivery
   });
 
-  // Handle disconnection
+  // Handle user disconnection
   socket.on('disconnect', () => {
     console.log('A user disconnected:', socket.id);
   });

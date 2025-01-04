@@ -14,6 +14,10 @@ router.post('/register', async (req, res) => {
   }
 
   try {
+    // Log the email and password (for debugging)
+    console.log('Email:', email);
+    console.log('Password to hash:', password);
+
     // Check if the user already exists
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -22,6 +26,9 @@ router.post('/register', async (req, res) => {
 
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Log the hashed password (for debugging)
+    console.log('Hashed password:', hashedPassword);
 
     // Create and save the new user
     const user = new User({ email, password: hashedPassword });
@@ -47,18 +54,26 @@ router.post('/login', async (req, res) => {
     // Check if the user exists
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ message: 'Invalid credentials' });
+      return res.status(400).json({ message: 'Invalid Credentials' });
     }
+
+    console.log('Entered Password:', password); // Log the entered password
+    console.log('Stored Hashed Password:', user.password); // Log the stored hash
 
     // Check if the entered password matches the stored password
     const isMatch = await bcrypt.compare(password, user.password);
+    console.log('password is:', password);
+    alert('user password is:', user.password);
+  alert('Password match status:', isMatch); // Log the result of bcrypt comparison
+
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
     // Generate JWT token
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
+    // Respond with the token
     res.json({ token });
   } catch (error) {
     console.error('Error during login:', error.message);

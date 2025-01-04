@@ -37,7 +37,6 @@ function Chat() {
   // Handle sending a new message
   const handleSendMessage = async (e) => {
     e.preventDefault();
-
     const formData = new FormData();
     formData.append('senderId', senderId);
     formData.append('receiverId', receiverId);
@@ -53,8 +52,9 @@ function Chat() {
       });
 
       // Emit the message through Socket.io
-      sendMessage(response.data);
+      sendMessage(response.data); // Ensure response.data contains the message object
 
+      // Clear input fields
       setMessage('');
       setFile(null);
     } catch (err) {

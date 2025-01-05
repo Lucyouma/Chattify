@@ -1,5 +1,4 @@
 const express = require('express');
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const router = express.Router();
@@ -14,9 +13,7 @@ router.post('/register', async (req, res) => {
   }
 
   try {
-    // Log the email and password (for debugging)
-    console.log('Email:', email);
-    console.log('Password to hash:', password);
+    console.log('Registration attempt:', { email });
 
     // Check if the user already exists
     const userExists = await User.findOne({ email });
@@ -24,16 +21,16 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Log the hashed password (for debugging)
-    console.log('Hashed password:', hashedPassword);
-
     // Create and save the new user
-    const user = new User({ email, password: hashedPassword });
+    const user = new User({
+      email: email.trim().toLowerCase(), // Normalize email by trimming and converting to lowercase
+      password: password.trim(), // Trim any extra spaces around the password
+    });
+
+    // Save the user (the password will be automatically hashed by the pre('save') hook)
     await user.save();
 
+    console.log('User registered successfully:', { email });
     res.status(201).json({ message: 'User registered successfully' });
   } catch (error) {
     console.error('Error during registration:', error.message);
@@ -51,29 +48,28 @@ router.post('/login', async (req, res) => {
   }
 
   try {
+    console.log('Login attempt:', { email });
+
     // Check if the user exists
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ message: 'Invalid Credentials' });
+      console.log('Invalid credentials - User not found');
+      return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    console.log('Entered Password:', password); // Log the entered password
-    console.log('Stored Hashed Password:', user.password); // Log the stored hash
-
-    // Check if the entered password matches the stored password
-    const isMatch = await bcrypt.compare(password, user.password);
-    console.log('password is:', password);
-    alert('user password is:', user.password);
-  alert('Password match status:', isMatch); // Log the result of bcrypt comparison
+    // Validate the password
+    const isMatch = await user.matchPassword(password);
+    console.log('Password validation result:', isMatch);
 
     if (!isMatch) {
+      console.log('Invalid credentials - Password mismatch');
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
     // Generate JWT token
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    // Respond with the token
+    console.log('Login successful:', { email });
     res.json({ token });
   } catch (error) {
     console.error('Error during login:', error.message);

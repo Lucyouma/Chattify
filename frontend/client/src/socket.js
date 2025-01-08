@@ -2,54 +2,54 @@ import { io } from 'socket.io-client';
 
 // Initialize Socket.io client with necessary configurations
 const socket = io('http://localhost:5000', {
-  transports: ['websocket'],  // Specifies that WebSocket transport should be used
-  autoConnect: false,         // Prevent auto connection, you will connect manually
-  reconnection: true,        // Reconnect automatically if the socket disconnects
-  reconnectionAttempts: 5,   // Number of reconnection attempts before giving up
-  reconnectionDelay: 1000,   // Delay between reconnection attempts
-  reconnectionDelayMax: 5000 // Max delay between reconnection attempts
+  transports: ['websocket'],  // Use WebSocket for better performance
+  autoConnect: false,         // Prevent auto-connection; you will connect manually
+  reconnection: true,         // Automatically reconnect if disconnected
+  reconnectionAttempts: 5,    // Number of reconnection attempts
+  reconnectionDelay: 1000,    // Delay between reconnection attempts
+  reconnectionDelayMax: 5000  // Maximum delay for reconnection
 });
 
-// Connect the socket manually when needed
+// Function to connect the socket manually
 const connectSocket = () => {
   if (!socket.connected) {
-    socket.connect();
-    console.log('Socket connected!');
+    socket.connect(); // Connect to the server
+    console.log('Socket connecting...');
   }
 
-  // Ensure message listener is set up once connected
+  // Handle successful connection
   socket.on('connect', () => {
     console.log('Socket connected with ID:', socket.id);
-    // Listen for incoming messages after the socket is connected
-    listenForMessages((message) => {
-      console.log('Received message:', message);
-    });
   });
 
   // Handle connection errors
   socket.on('connect_error', (err) => {
-    console.error('Connection failed: ', err.message);
+    console.error('Socket connection failed:', err.message);
   });
 };
 
-// Emit a message event to send data
+// Function to send a message to the server
 const sendMessage = (message) => {
   if (socket.connected) {
-    socket.emit('sendMessage', message);  // Emit the message to the server
+    socket.emit('sendMessage', message); // Emit the message event to the server
     console.log('Message sent:', message);
   } else {
-    console.error('Socket is not connected!');
+    console.error('Cannot send message; socket is not connected!');
   }
 };
 
-// Listen for incoming messages from other users
+// Function to listen for incoming messages
 const listenForMessages = (callback) => {
+  // Ensure the listener is added only once
+  if (socket.hasListeners('receiveMessage')) return;
+
   socket.on('receiveMessage', (message) => {
-    callback(message);  // Execute the callback when a new message is received
+    callback(message); // Execute the callback when a message is received
+    console.log('New message received:', message);
   });
 };
 
-// Handle disconnection
+// Function to disconnect the socket manually
 const disconnectSocket = () => {
   if (socket.connected) {
     socket.disconnect();
@@ -59,9 +59,11 @@ const disconnectSocket = () => {
   }
 };
 
-// Optional: Keep track of socket connection state
+// Function to get the current connection status
 const getSocketStatus = () => {
   return socket.connected ? 'Connected' : 'Disconnected';
 };
 
+// Export all the functions for use in other components
 export { connectSocket, sendMessage, listenForMessages, disconnectSocket, getSocketStatus };
+

@@ -1,30 +1,39 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom'; // Import routing components
+import { BrowserRouter as Router, Route, Routes, Link, Navigate } from 'react-router-dom';
 import Chat from './components/Chat'; // Import Chat component
 import LoginForm from './components/LoginForm'; // Import LoginForm component
 import RegisterForm from './components/RegisterForm'; // Import RegisterForm component
-import './App.css'; // Import CSS
+import './App.css'; // Import your CSS file
 
 function App() {
   return (
     <Router>
       <div className="App">
         <header className="App-header">
-          <h1>Welcome to Chattify!</h1>
-          <p>Your One-Stop Solution For Seamless Communication.</p>
+          <h1>Chattify</h1>
+          <p>Your One-Stop Solution For Seamless Communication</p>
           {/* Navigation Links */}
           <nav>
-            <Link to="/login">Login</Link> | <Link to="/register">Register</Link> |{' '}
-            <Link to="/chat">Chat</Link>
+            <ul className="nav-links">
+              <li><Link to="/login">Login</Link></li>
+              <li><Link to="/register">Register</Link></li>
+              <li><Link to="/chat">Chat</Link></li>
+            </ul>
           </nav>
         </header>
 
-        {/* Routes for different components */}
-        <Routes>
-          <Route path="/login" element={<LoginForm />} />
-          <Route path="/register" element={<RegisterForm />} />
-          <Route path="/chat" element={<Chat />} />
-        </Routes>
+        {/* Main Content Area */}
+        <div className="main-content">
+          <Routes>
+            {/* Define Routes for each page */}
+            <Route path="/" element={<Navigate to="/login" />} /> {/* Default Route */}
+            <Route path="/login" element={<LoginForm />} />
+            <Route path="/register" element={<RegisterForm />} />
+            <Route path="/chat" element={<Chat />} />
+            {/* Fallback Route */}
+            <Route path="*" element={<h2>Page Not Found</h2>} />
+          </Routes>
+        </div>
       </div>
     </Router>
   );

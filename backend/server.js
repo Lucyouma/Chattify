@@ -5,12 +5,16 @@ const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const chatRoutes = require('./routes/chatRoutes');
+const messageRoutes = require('./routes/Message'); // Import message routes
+const protectedRoutes = require('./routes/protectedRoutes'); // Protected routes
 const multer = require('multer'); // For handling file uploads
 const cloudinary = require('cloudinary').v2; // Cloudinary integration
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const cors = require('cors'); // CORS middleware
+const authenticate = require('./middleware/authMiddleware'); // JWT middleware
+const User = require('./models/User'); // Import User model (make sure it's in place)
 
-// Load environment variables
+// Load environment variables from .env
 dotenv.config();
 
 // Initialize Express app
@@ -23,11 +27,15 @@ app.get('/', (req, res) => {
 
 // Middleware to parse JSON
 app.use(express.json());
-app.use(cors({
-  origin: 'http://localhost:3000', // Frontend URL
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true,
-}));
+
+// CORS configuration
+app.use(
+  cors({
+    origin: 'http://localhost:3000', // Frontend URL (ensure it's correct)
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true, // Allows cookies if required
+  })
+);
 
 // Connect to MongoDB
 connectDB()
@@ -55,10 +63,10 @@ const upload = multer({
   storage,
   limits: { fileSize: 10 * 1024 * 1024 }, // Limit file size to 10MB
   fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) { 
+    if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) {
       cb(null, true); // Accept image and video files
     } else {
-      cb(new Error('Only image, video, and document files are allowed!'), false);
+      cb(new Error('Only image, video, and document files are allowed!'), false);    
     }
   },
 });
@@ -66,6 +74,8 @@ const upload = multer({
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/messages', messageRoutes); // Add message routes
+app.use('/api/protected', protectedRoutes); // Use JWT middleware for protected routes
 
 // Endpoint to handle multimedia uploads
 app.post('/api/upload', upload.single('file'), (req, res) => {
@@ -79,11 +89,22 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
   }
 });
 
+// Add a new route to get the list of all users, excluding the logged-in user
+app.get('/api/users', authenticate, async (req, res) => {
+  try {
+    // Fetch all users except the currently authenticated user (req.user.id)
+    const users = await User.find({ _id: { $ne: req.user.id } });
+    res.json(users); // Send the list of users as a response
+  } catch (err) {
+    res.status(500).json({ error: 'Error fetching users' });
+  }
+});
+
 // Create HTTP server and integrate with Socket.io
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: 'http://localhost:3000', // Actual frontend URL
+    origin: 'http://localhost:3000', // Ensure this is the correct frontend URL
     methods: ['GET', 'POST'],
   },
 });

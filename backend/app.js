@@ -16,7 +16,7 @@ async function main() {
   const db = client.db(dbName);
   const collection = db.collection('documents');
 
-  // the following code examples can be pasted here...
+  // the code block
 
   return 'done.';
 }

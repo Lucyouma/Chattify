@@ -1,5 +1,5 @@
 # **Chattify**
-Chattify is a feature-rich chat application that enables real-time communication. The app offers functionalities such as messaging, multimedia sharing, user authentication, and threaded conversations. This README file provides a detailed explanation of the project, including how to set it up, the purpose of each function, and how it works. 
+Chattify is a feature-rich chat application that enables real-time communication. The app offers functionalities such as messaging, multimedia sharing, user authentication, and threaded conversations. This README file provides a detailed explanation of my project, including how to set it up, the purpose of each function, and how it works. 
 ________________________________________
 # **Contents**
 	Features
@@ -45,27 +45,26 @@ Chattify/
 └── README.md
 ________________________________________
 # **Setup Instructions**
-	Prerequisites
 	Node.js: Version 20 or higher
 	MongoDB: Version 6 or higher
 	Cloudinary Account (for multimedia storage)
 
 **Steps**
-1.	Clone the Repository:
-2.	git clone https://github.com/your-username/Chattify.git
+1.	Clone the Repository
+2.	git clone my Chattify Repository.
 3.	cd Chattify/backend
-4.	Install Dependencies:
+4.	Install Dependencies
 5.	npm install
 6.	Set Up MongoDB: Ensure MongoDB is running locally or provide a connection string in the .env file.
 7.	Configure Environment Variables: Create a .env file in the backend directory:
 8.	MONGO_URI=<My MongoDB connection string>
 9.	JWT_SECRET=<My secret key>
-10.	CLOUDINARY_CLOUD_NAME=<Your Cloudinary cloud name>
-11.	CLOUDINARY_API_KEY=<Your Cloudinary API key>
-12.	CLOUDINARY_API_SECRET=<Your Cloudinary API secret>
-13.	Start the Server:
+10.	CLOUDINARY_CLOUD_NAME=<My Cloudinary cloud name>
+11.	CLOUDINARY_API_KEY=<My Cloudinary API key>
+12.	CLOUDINARY_API_SECRET=<My Cloudinary API secret>
+13.	Start the Server
 14.	node server.js
-15.	Run the Frontend (if applicable): Navigate to the frontend directory, install dependencies, and start the React app:
+15.	Run the Frontend: Navigate to the frontend directory, install dependencies, and start the React app:
 16.	cd ../frontend
 17.	npm install
 18.	npm start
@@ -146,13 +145,13 @@ ________________________________________
 	});
 ________________________________________
 # **Running the Application**
-	Start the backend server:
+	Start the backend server
 	cd backend
 	node server.js
-	Start the frontend React app:
+	Start the frontend React app
 	cd ../frontend/client
 	npm start
-	Open the app in a browser at http://localhost:3000.
+	Open my app in a browser at http://localhost:3000.
 ________________________________________
 # **Testing**
 	Use jest and supertest for backend testing.

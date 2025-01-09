@@ -104,7 +104,7 @@ app.get('/api/users', authenticate, async (req, res) => {
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: 'http://localhost:3000', // Ensure this is the correct frontend URL
+    origin: 'http://localhost:3000', // My frontend URL
     methods: ['GET', 'POST'],
   },
 });

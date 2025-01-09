@@ -21,17 +21,17 @@ const refreshTokens = new Set();
 
 exports.register = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { username, password, email } = req.body;
 
-    // Check if email is already taken
-    const existingUser = await User.findOne({ email });
+    // Check if username or email is already taken
+    const existingUser = await User.findOne({ $or: [{ username }, { email }] });
     if (existingUser) {
-      return res.status(400).json({ message: 'Email already exists' });
+      return res.status(400).json({ message: 'Username or email already exists' });
     }
 
     // Hash the password and create a new user
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ email, password: hashedPassword });
+    const user = new User({ username, email, password: hashedPassword });
     await user.save();
 
     // Generate tokens
@@ -48,9 +48,9 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { username, password } = req.body;
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ username });
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
@@ -95,4 +95,3 @@ exports.logout = (req, res) => {
 
   res.status(200).json({ message: 'Logged out successfully' });
 };
-

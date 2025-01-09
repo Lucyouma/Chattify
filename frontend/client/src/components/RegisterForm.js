@@ -1,12 +1,9 @@
 import React, { useState } from 'react';
-import { registerUser } from '../utils/api'; // Assuming registerUser is correctly implemented in utils/api.js
-import 'react-phone-number-input/style.css';
-import PhoneInput from 'react-phone-number-input';
+import { registerUser } from '../utils/api'; // Assuming registerUser is correctly implemented
 
 const RegisterForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  // const [contact, setContact] = useState();
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false); // To track if the form is submitting
 
@@ -15,18 +12,17 @@ const RegisterForm = () => {
     setMessage(''); // Clear previous messages
     setLoading(true); // Set loading to true to show loading state
 
-    console.log('Registration attempt started'); // Debugging log to confirm function is triggered
+    console.log('Registration attempt started'); // Debugging log to confirm function execution
 
     try {
       const data = await registerUser({ email, password });
 
-      console.log('Response from registerUser:', data); // Log response from the API
-
+      console.log('Response from registerUser:', data); // Log response from the API for debugging
       if (data && typeof data.message === 'string') {
         setMessage(data.message); // Set success or error message from API response
       } else {
         setMessage(
-          'Registration successful! Please check your email to confirm.',
+          'Registration successful! Please check your email to confirm.'
         ); // Success message
       }
     } catch (error) {
@@ -36,10 +32,10 @@ const RegisterForm = () => {
       if (error.response && error.response.data) {
         setMessage(
           error.response.data.message ||
-            'Registration failed! Please try again.',
+            'Registration failed! Please try again.'
         );
       } else {
-        setMessage('An unexpected error occurred. Please try again later.'); // General error message
+        setMessage('An unexpected error occurred. Please try again later.'); // Generic error message
       }
     } finally {
       setLoading(false); // Reset loading state after request
@@ -56,23 +52,11 @@ const RegisterForm = () => {
             placeholder='Email'
             aria-label='Email'
             value={email}
-            onChange={(e) => setEmail(e.target.value)} // Update email state on input change
+            onChange={(e) => setEmail(e.target.value)} // Update email state on input
             required
             className='input-field'
           />
         </div>
-
-        {/* <div className='input-group'>
-          <PhoneInput
-            placeholder='Enter Phone number'
-            // onChange={(e) => setContact(e.target.value)} // Update phone contact on input change
-            // onChange={setContact}
-            value={contact}
-            onChange={(value) => setContact(value || null)}
-            required
-            className='input-field'
-          />
-        </div> */}
 
         <div className='input-group'>
           <input
@@ -80,17 +64,17 @@ const RegisterForm = () => {
             placeholder='Password'
             aria-label='Password'
             value={password}
-            onChange={(e) => setPassword(e.target.value)} // Update password state on input change
+            onChange={(e) => setPassword(e.target.value)} // Update password state on input
             required
             className='input-field'
           />
         </div>
+
         <button type='submit' className='submit-btn' disabled={loading}>
           {loading ? 'Registering...' : 'Register'}
         </button>
       </form>
-      {message && <p className='message'>{message}</p>}
-      {/* Show success/error message */}
+      {message && <p className='message'>{message}</p>} {/* Show success/error message */}
     </div>
   );
 };

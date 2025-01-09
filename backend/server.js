@@ -12,7 +12,7 @@ const cloudinary = require('cloudinary').v2; // Cloudinary integration
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const cors = require('cors'); // CORS middleware
 const authenticate = require('./middleware/authMiddleware'); // JWT middleware
-const User = require('./models/User'); // Import User model (make sure it's in place)
+const User = require('./models/User'); // Import User model
 
 // Load environment variables from .env
 dotenv.config();

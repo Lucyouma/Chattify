@@ -23,6 +23,12 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: '', // Optional profile picture field with a default value
   },
+  contact: {
+    type: String,
+    required: true,  // Ensures contact info is always provided
+    unique: true,    // Optional: make contact information unique (if necessary)
+    trim: true,      // Removes extra spaces
+  },
 });
 
 // Hash password before saving to database

@@ -19,13 +19,21 @@ apiClient.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error); // Handle any request errors
-  }
+  },
 );
 
 // Register user function
 export const registerUser = async (userData) => {
   try {
     const response = await apiClient.post('/auth/register', userData); // Send POST request for registration
+    return response.data; // Return server response (data)
+  } catch (error) {
+    throw error.response ? error.response.data : error; // Handle error
+  }
+};
+export const getUsers = async () => {
+  try {
+    const response = await apiClient.get('/auth/users');
     return response.data; // Return server response (data)
   } catch (error) {
     throw error.response ? error.response.data : error; // Handle error

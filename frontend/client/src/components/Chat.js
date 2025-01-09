@@ -1,95 +1,132 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { getUsers } from '../utils/api';
 import {
   connectSocket,
   sendMessage,
   listenForMessages,
   disconnectSocket,
-  getSocketStatus,
 } from '../socket'; // Adjust the import path as needed
+import axios from 'axios'; // For making API calls
 
 const Chat = () => {
   const [message, setMessage] = useState('');
   const [chatHistory, setChatHistory] = useState([]);
-  const [connectionStatus, setConnectionStatus] = useState(getSocketStatus());
+  const [connectionStatus, setConnectionStatus] = useState('Disconnected');
+  const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
-    // Connect to the socket when the component mounts
+    // Connect socket and listen for messages
     connectSocket();
-    setConnectionStatus(getSocketStatus());
+    setConnectionStatus('Connected');
 
-    // Listen for incoming messages
     listenForMessages((incomingMessage) => {
-      setChatHistory((prev) => [
-        ...prev,
-        { sender: 'Server', text: incomingMessage },
-      ]);
+      setChatHistory((prev) => [...prev, incomingMessage]);
     });
 
-    // Clean up by disconnecting the socket when the component unmounts
+    // Fetch users from the database
+    const fetchUsers = async () => {
+      const usersData = await getUsers(); // Await the promise to resolve
+      setUsers(usersData); // Set the fetched data into the state
+    };
+
+    fetchUsers();
+
     return () => {
       disconnectSocket();
-      setConnectionStatus(getSocketStatus());
+      setConnectionStatus('Disconnected');
     };
   }, []);
 
+  const handleUserClick = (user) => {
+    setSelectedUser(user);
+    setChatHistory([]); // Clear previous messages
+  };
+
   const handleSendMessage = () => {
-    if (message.trim() !== '') {
-      sendMessage(message);
-      setChatHistory((prev) => [...prev, { sender: 'You', text: message }]);
-      setMessage(''); // Clear the input field
+    if (message.trim() !== '' && selectedUser) {
+      const newMessage = {
+        sender: 'You',
+        receiver: selectedUser.name,
+        text: message,
+      };
+      sendMessage(newMessage);
+      setChatHistory((prev) => [...prev, newMessage]);
+      setMessage('');
     } else {
-      console.error('Message cannot be empty');
+      console.error('Message cannot be empty or no user selected');
     }
   };
 
   return (
     <div
       style={{
-        maxWidth: '600px',
+        maxWidth: '800px',
         margin: 'auto',
         fontFamily: 'Arial, sans-serif',
       }}
     >
       <h2>Socket.io Chat</h2>
 
-      {/* Connection Status */}
-      <div>
-        <strong>Status:</strong> {connectionStatus}
-      </div>
-
-      {/* Chat History */}
-      <div
-        style={{
-          border: '1px solid #ccc',
-          padding: '10px',
-          marginTop: '10px',
-          height: '300px',
-          overflowY: 'scroll',
-          backgroundColor: '#f9f9f9',
-        }}
-      >
-        {chatHistory.map((entry, index) => (
-          <div key={index}>
-            <strong>{entry.sender}:</strong> {entry.text}
-          </div>
-        ))}
-      </div>
-
-      {/* Message Input and Send Button */}
-      <div style={{ marginTop: '10px' }}>
-        <input
-          type='text'
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder='Type your message'
-          style={{ width: '80%', padding: '10px' }}
-        />
-        <button
-          onClick={handleSendMessage}
-          style={{ padding: '10px', marginLeft: '10px' }}
+      <div style={{ display: 'flex' }}>
+        {/* User List */}
+        <div
+          style={{ flex: '1', borderRight: '1px solid #ccc', padding: '10px' }}
         >
-          Send
-        </button>
+          <h3>Users</h3>
+          <ul>
+            {users.map((user) => (
+              <li
+                key={user.id}
+                style={{
+                  padding: '5px',
+                  cursor: 'pointer',
+                  backgroundColor:
+                    selectedUser?.id === user.id ? '#e0e0e0' : 'transparent',
+                }}
+                onClick={() => handleUserClick(user)}
+              >
+                {user.name}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Chat Window */}
+        <div style={{ flex: '2', padding: '10px' }}>
+          <h3>Chat with {selectedUser ? selectedUser.name : '...'}</h3>
+          <div
+            style={{
+              border: '1px solid #ccc',
+              padding: '10px',
+              height: '300px',
+              overflowY: 'scroll',
+              backgroundColor: '#f9f9f9',
+            }}
+          >
+            {chatHistory.map((entry, index) => (
+              <div key={index}>
+                <strong>{entry.sender}:</strong> {entry.text}
+              </div>
+            ))}
+          </div>
+
+          <div style={{ marginTop: '10px' }}>
+            <input
+              type='text'
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder='Type your message'
+              style={{ width: '80%', padding: '10px' }}
+            />
+            <button
+              onClick={handleSendMessage}
+              style={{ padding: '10px', marginLeft: '10px' }}
+            >
+              Send
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

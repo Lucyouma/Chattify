@@ -79,7 +79,7 @@ function Chat() {
           });
           setMessages(response.data);
         } catch (error) {
-          console.error('Error fetching messages:', error);
+          console.error('Error fetching message:', error);
         }
       };
       fetchMessages();

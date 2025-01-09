@@ -55,7 +55,7 @@ const ChatWindow = ({
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder='Type a message...'
+              placeholder='Type a message..'
               required
               className='message-box'
             />

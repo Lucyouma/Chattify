@@ -49,7 +49,7 @@ const UserSelectionContainer = ({
                       {user?.name || 'Unknown User'}
                     </h3>
                     <p className='text-sm text-gray-500'>
-                      {user?.email || 'No email provided'}
+                      {user?.email || 'No user email provided'}
                     </p>
                   </div>
                 </div>

@@ -1,0 +1,97 @@
+        {receiverId && (
+          <div className='flex-1 flex flex-col bg-gray-50'>
+            {/* Your existing chat window code */}
+            {receiverId && (
+              <div className='chat-window'>
+                <h3>
+                  Chatting with:{' '}
+                  {users.find((user) => user.id === receiverId)?.name}
+                </h3>
+                <div className='chat-messages'>
+                  {messages.map((msg) => (
+                    <div
+                      key={msg._id || `${msg.senderId}-${msg.timestamp}`}
+                      className={msg.senderId === userId ? 'sent' : 'received'}
+                    >
+                      <p>{msg.content}</p>
+                      {msg.multimedia && (
+                        <div className='chat-media'>
+                          {msg.multimedia.endsWith('.jpg') ||
+                          msg.multimedia.endsWith('.png') ? (
+                            <img
+                              src={msg.multimedia}
+                              alt='attachment'
+                              className='chat-image'
+                            />
+                          ) : (
+                            <a
+                              href={msg.multimedia}
+                              target='_blank'
+                              rel='noopener noreferrer'
+                              className='chat-file-link'
+                            >
+                              Download File
+                            </a>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Message Input */}
+                <form onSubmit={handleSendMessage} className='chat-input'>
+                  <textarea
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder='Type a message...'
+                    required
+                    className='message-box'
+                  />
+                  <input
+                    type='file'
+                    onChange={handleFileChange}
+                    className='file-input'
+                  />
+                  {fileName && (
+                    <p className='file-name'>Selected File: {fileName}</p>
+                  )}
+                  <button type='submit' className='send-button'>
+                    Send
+                  </button>
+                </form>
+              </div>
+            )}
+          </div>
+        )}
+
+
+
+
+
+
+
+        
+      {/* User List with Search */}
+      {/* <div className='user-list'>
+        <h3>Users:</h3>
+        <input
+          type='text'
+          placeholder='Search by name or email...'
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className='search-bar'
+        />
+        <ul>
+          {filteredUsers.map((user) => (
+            <li
+              key={user.id}
+              onClick={() => handleUserClick(user.id)}
+              className={receiverId === user.id ? 'active' : ''}
+            >
+              <span className='user-name'>{user.name}</span>
+              <span className='user-contact'> ({user.email})</span>
+            </li>
+          ))}
+        </ul>
+      </div> */}

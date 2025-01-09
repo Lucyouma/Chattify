@@ -30,7 +30,9 @@ function Thread() {
       const response = await axios.post(
         `/threads/${threadId}/reply`,
         { content: reply },
-        { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        },
       );
 
       // Update the thread messages with the new reply
@@ -42,24 +44,26 @@ function Thread() {
   };
 
   return (
-    <div className="thread-container">
+    <div className='thread-container'>
       <h2>Thread Messages</h2>
-      <div className="thread-messages">
+      <div className='thread-messages'>
         {threadMessages.map((message) => (
-          <div key={message.id} className="thread-message">
-            <p><strong>{message.senderName}</strong>: {message.content}</p>
+          <div key={message.id} className='thread-message'>
+            <p>
+              <strong>{message.senderName}</strong>: {message.content}
+            </p>
           </div>
         ))}
       </div>
 
-      <form onSubmit={handleSendReply} className="reply-form">
+      <form onSubmit={handleSendReply} className='reply-form'>
         <textarea
           value={reply}
           onChange={(e) => setReply(e.target.value)}
-          placeholder="Write your reply..."
+          placeholder='Write your reply...'
           required
         ></textarea>
-        <button type="submit">Send Reply</button>
+        <button type='submit'>Send Reply</button>
       </form>
     </div>
   );

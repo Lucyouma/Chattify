@@ -2,22 +2,23 @@ import React, { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 import axios from '../utils/axios';
 import { useNavigate } from 'react-router-dom';
-
+import UserSelectionContainer from './userselection';
+import ChatWindow from './chatwindow';
 function Chat() {
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState('');
   const [file, setFile] = useState(null);
   const [fileName, setFileName] = useState('');
   const [userId, setUserId] = useState(null);
-  const [users, setUsers] = useState([]); // List of users to display
-  const [receiverId, setReceiverId] = useState(null); // The ID of the user you are chatting with
-  const [searchTerm, setSearchTerm] = useState(''); // Search term for filtering users
+  const [users, setUsers] = useState([]); // List of users
+  const [receiverId, setReceiverId] = useState(null); // The selected user's ID
+  const [searchTerm, setSearchTerm] = useState(''); // For filtering users
   const socketRef = useRef(null);
   const navigate = useNavigate();
 
-  // Fetch logged-in user and list of users
+  // Authenticate user and fetch users
   useEffect(() => {
-    const checkAuthentication = async () => {
+    const authenticateUser = async () => {
       const token = localStorage.getItem('token');
       if (!token) {
         alert('You are not logged in!');
@@ -26,30 +27,30 @@ function Chat() {
       }
 
       try {
-        const response = await axios.get('/auth/user', {
+        const userResponse = await axios.get('/auth/user', {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setUserId(response.data.id);
+        setUserId(userResponse.data.id);
 
-        // Fetch list of users excluding the logged-in user
         const usersResponse = await axios.get('/users', {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setUsers(usersResponse.data);
-      } catch (err) {
-        console.error('Authentication failed:', err.message);
+        setUsers(
+          usersResponse.data.filter((user) => user.id !== userResponse.data.id),
+        );
+      } catch (error) {
+        console.error('Error fetching user data:', error);
         alert('Session expired. Please log in again.');
         localStorage.removeItem('token');
         navigate('/login');
       }
     };
 
-    checkAuthentication();
+    authenticateUser();
 
-    // Initialize socket connection
+    // Setup socket connection
     if (!socketRef.current) {
       socketRef.current = io('http://localhost:5000');
-
       socketRef.current.on('receiveMessage', (newMessage) => {
         setMessages((prevMessages) => [...prevMessages, newMessage]);
       });
@@ -66,17 +67,19 @@ function Chat() {
     };
   }, [navigate]);
 
-  // Fetch messages for a selected user
+  // Fetch messages when a receiver is selected
   useEffect(() => {
     if (receiverId) {
       const fetchMessages = async () => {
         try {
           const response = await axios.get(`/chat/${receiverId}`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
           });
           setMessages(response.data);
-        } catch (err) {
-          console.error('Error fetching messages:', err.message);
+        } catch (error) {
+          console.error('Error fetching messages:', error);
         }
       };
       fetchMessages();
@@ -105,7 +108,7 @@ function Chat() {
 
       const sentMessage = response.data;
 
-      // Emit the message to the server via socket
+      // Emit message via socket
       if (socketRef.current) {
         socketRef.current.emit('sendMessage', sentMessage);
       }
@@ -114,8 +117,8 @@ function Chat() {
       setMessage('');
       setFile(null);
       setFileName('');
-    } catch (err) {
-      console.error('Error sending message:', err.message);
+    } catch (error) {
+      console.error('Error sending message:', error);
     }
   };
 
@@ -132,89 +135,42 @@ function Chat() {
     setMessages([]); // Clear previous messages
   };
 
-  const filteredUsers = users.filter((user) =>
-    (user.name && user.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (user.contact && user.contact.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredUsers = users.filter(
+    (user) =>
+      user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
-    <div className="chat-container">
-      <header className="chat-header">
-        <h1 className="chat-title">Chat</h1>
+    <div className='chat-container'>
+      <header className='chat-header'>
+        <h1 className='chat-title'>Chat</h1>
       </header>
 
-      {/* User List with Search */}
-      <div className="user-list">
-        <h3>Select a User to Chat:</h3>
-        <input
-          type="text"
-          placeholder="Search by name or contact..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="search-bar"
+      <div className='flex h-screen'>
+        <UserSelectionContainer
+          users={filteredUsers}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          handleUserClick={handleUserClick}
+          activeUserId={receiverId}
         />
-        <ul>
-          {filteredUsers.map((user) => (
-            <li
-              key={user.id}
-              onClick={() => handleUserClick(user.id)}
-              className={receiverId === user.id ? 'active' : ''}
-            >
-              <span className="user-name">{user.name}</span>
-              <span className="user-contact"> ({user.contact})</span>
-            </li>
-          ))}
-        </ul>
+
+        {/* Chat Window */}
+        <ChatWindow
+          messages={messages}
+          userId={userId}
+          receiverId={receiverId}
+          users={users}
+          message={message}
+          setMessage={setMessage}
+          handleSendMessage={handleSendMessage}
+          handleFileChange={handleFileChange}
+          fileName={fileName}
+        />
       </div>
 
-      {/* Chat Messages */}
-      {receiverId && (
-        <div className="chat-window">
-          <h3>Chatting with: {users.find((user) => user.id === receiverId)?.name}</h3>
-          <div className="chat-messages">
-            {messages.map((msg) => (
-              <div
-                key={msg._id || msg.senderId + msg.timestamp}
-                className={msg.senderId === userId ? 'sent' : 'received'}
-              >
-                <p>{msg.content}</p>
-                {msg.multimedia && (
-                  <div className="chat-media">
-                    {msg.multimedia.endsWith('.jpg') || msg.multimedia.endsWith('.png') ? (
-                      <img src={msg.multimedia} alt="multimedia" className="chat-image" />
-                    ) : (
-                      <a
-                        href={msg.multimedia}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="chat-file-link"
-                      >
-                        Download File
-                      </a>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* Message Input */}
-          <form onSubmit={handleSendMessage} className="chat-input">
-            <textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Type a message..."
-              required
-              className="message-box"
-            />
-            <input type="file" onChange={handleFileChange} className="file-input" />
-            {fileName && <p className="file-name">Selected File: {fileName}</p>}
-            <button type="submit" className="send-button">
-              Send
-            </button>
-          </form>
-        </div>
-      )}
+      {/* Chat Window */}
     </div>
   );
 }

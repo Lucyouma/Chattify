@@ -1,7 +1,5 @@
-/* Font Import */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;1,400;1,500&display=swap');
 
-/* Universal Reset and Font Family */
 * {
     margin: 0;
     padding: 0;
@@ -17,7 +15,6 @@ body {
     align-items: center;
 }
 
-/* App Container */
 .app {
     width: 100%;
     max-width: 1200px;
@@ -46,7 +43,7 @@ body {
     font-weight: 500;
 }
 
-/* Form Styling */
+/* Forms */
 .form-container {
     display: flex;
     justify-content: center;
@@ -91,7 +88,7 @@ form .form-group input {
 form .form-group button {
     width: 100%;
     padding: 10px;
-    background-color: #003366;
+    background-color: #003366; /* Dark blue for buttons */
     color: #fff;
     border: none;
     border-radius: 4px;
@@ -100,10 +97,10 @@ form .form-group button {
 }
 
 form .form-group button:hover {
-    background-color: #001a4d;
+    background-color: #001a4d; /* Slightly darker shade on hover */
 }
 
-/* Chat Section Styling */
+/* Chat Section */
 .chat-container {
     flex-grow: 1;
     display: flex;
@@ -123,7 +120,6 @@ form .form-group button:hover {
     margin: 0;
 }
 
-/* Chat Messages */
 .chat-messages {
     flex-grow: 1;
     padding: 20px;
@@ -143,7 +139,7 @@ form .form-group button:hover {
 }
 
 .message.sent {
-    background-color: #003366;
+    background-color: #003366; /* Dark blue for sent messages */
     color: #fff;
     align-self: flex-end;
     border-bottom-right-radius: 0;
@@ -157,7 +153,7 @@ form .form-group button:hover {
 
 /* Tweet-like Message Style */
 .message.tweet {
-    background-color: #1da1f2;
+    background-color: #1da1f2; /* Twitter blue */
     color: #fff;
     align-self: center;
     border-radius: 15px;
@@ -165,7 +161,6 @@ form .form-group button:hover {
     font-style: italic;
 }
 
-/* Chat Input */
 .chat-input {
     display: flex;
     padding: 10px;
@@ -182,18 +177,16 @@ form .form-group button:hover {
 }
 
 .chat-input button {
-    background-color: #003366;
+    background-color: #003366; /* Dark blue */
     color: #fff;
     border: none;
     border-radius: 50%;
     padding: 10px;
     cursor: pointer;
-    width: 45px;
-    height: 45px;
 }
 
 .chat-input button:hover {
-    background-color: #001a4d;
+    background-color: #001a4d; /* Hover color */
 }
 
 /* Responsive */
@@ -201,6 +194,7 @@ form .form-group button:hover {
     .app {
         height: 100vh;
     }
+}
 
     .navbar {
         font-size: 18px;
@@ -221,4 +215,3 @@ form .form-group button:hover {
     .chat-input {
         padding: 5px;
     }
-}

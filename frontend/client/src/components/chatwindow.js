@@ -1,5 +1,21 @@
 import React from 'react';
 
+/**
+ * ChatWindow Component
+ * This component handles the display of messages, the message input box,
+ * and file attachments. It also manages the user interface for sending messages.
+ *
+ * Props:
+ * - messages (array): List of chat messages to display
+ * - userId (string): ID of the logged-in user
+ * - receiverId (string): ID of the user currently being chatted with
+ * - users (array): List of all users (excluding current user)
+ * - message (string): The current message being typed
+ * - setMessage (function): Function to update the message state
+ * - handleSendMessage (function): Function to send the message
+ * - handleFileChange (function): Function to handle file input changes
+ * - fileName (string): Name of the selected file for attachment
+ */
 const ChatWindow = ({
   messages = [],
   userId,
@@ -11,13 +27,20 @@ const ChatWindow = ({
   handleFileChange,
   fileName,
 }) => {
+  // Find the user object for the selected receiver
   const selectedUser = users.find((user) => user.id === receiverId);
 
   return (
     <div className='flex-1 flex flex-col bg-gray-50'>
+      {/* Only display the chat window if a receiver is selected */}
       {receiverId && (
         <div className='chat-window'>
-          <h3>Chatting with: {selectedUser?.name}</h3>
+          {/* Chat header with the name of the person you are chatting with */}
+          <h3 className='chat-header'>
+            Chatting with: {selectedUser?.name}
+          </h3>
+          
+          {/* Display the chat messages */}
           <div className='chat-messages'>
             {messages.map((msg) => (
               <div
@@ -25,6 +48,7 @@ const ChatWindow = ({
                 className={msg.senderId === userId ? 'sent' : 'received'}
               >
                 <p>{msg.content}</p>
+                {/* Display media attachments if present */}
                 {msg.multimedia && (
                   <div className='chat-media'>
                     {msg.multimedia.endsWith('.jpg') ||
@@ -50,21 +74,28 @@ const ChatWindow = ({
             ))}
           </div>
 
-          {/* Message Input */}
+          {/* Message input form */}
           <form onSubmit={handleSendMessage} className='chat-input'>
+            {/* Text area for typing messages */}
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder='Type a message..'
+              placeholder='Type a message...'
               required
-              className='message-box'
+              className='message-box' // Ensure the message box is visible and well-sized
             />
+            
+            {/* File input for uploading files */}
             <input
               type='file'
               onChange={handleFileChange}
               className='file-input'
             />
+            
+            {/* Display file name if a file is selected */}
             {fileName && <p className='file-name'>Selected File: {fileName}</p>}
+            
+            {/* Send button */}
             <button type='submit' className='send-button'>
               Send
             </button>

@@ -1,57 +1,71 @@
 import React from 'react';
 
+/**
+ * UserSelectionContainer Component
+ * 
+ * This component displays a list of available users and allows selecting a user for initiating a chat.
+ * It includes search functionality to filter users by their email or ID.
+ * 
+ * Props:
+ * - users: Array of user objects (default: []). Each user object must contain `_id` and `email` fields.
+ * - searchTerm: String used to filter users by email or ID.
+ * - setSearchTerm: Function to update the search term.
+ * - handleUserClick: Function to handle the selection of a user by their unique `_id`.
+ * - activeUserId: The `_id` of the currently active/selected user.
+ */
 const UserSelectionContainer = ({
-  users = [], // Provide default empty array
+  users = [], // Default to an empty array if no users are provided
   searchTerm = '',
   setSearchTerm,
-  handleUserClick,
-  activeUserId,
+  handleUserClick, // Function to handle user selection
+  activeUserId, // Currently selected user highlight ID
 }) => {
-  // Guard against undefined users
+  // Ensure `users` is always a valid array
   const safeUsers = Array.isArray(users) ? users : [];
 
+  // Filter users by the search term
+  const filteredUsers = safeUsers.filter(
+    (user) =>
+      user?._id.includes(searchTerm) || user?.email?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
-    <div className='w-1/4 bg-white border-r border-gray-200 p-4'>
-      <div className='mb-4'>
-        <h2 className='text-xl font-semibold mb-3'>Available Users</h2>
+    <div className="w-1/4 bg-white border-r border-gray-200 p-4">
+      {/* Search input */}
+      <div className="mb-4">
+        <h2 className="text-xl font-semibold mb-3">Available Users</h2>
         <input
-          type='text'
-          placeholder='Search users...'
+          type="text"
+          placeholder="Search by email or ID..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
 
-      <div className='overflow-y-auto max-h-[calc(100vh-200px)]'>
-        {safeUsers.length === 0 ? (
-          <p className='text-gray-500 text-center'>No users found</p>
+      {/* User list */}
+      <div className="overflow-y-auto max-h-[calc(100vh-200px)]">
+        {filteredUsers.length === 0 ? (
+          <p className="text-gray-500 text-center">No users found</p>
         ) : (
-          <ul className='space-y-2'>
-            {safeUsers.map((user) => (
+          <ul className="space-y-2">
+            {filteredUsers.map((user) => (
               <li
-                key={user?.id || Math.random()} // Fallback key if id is undefined
-                onClick={() => handleUserClick(user?.id)}
+                key={user?._id} // MongoDB's unique `_id` as key
+                onClick={() => handleUserClick(user?._id)} // Pass `_id` to the click handler
                 className={`p-3 rounded-lg cursor-pointer transition-colors duration-150 ${
-                  activeUserId === user?.id
-                    ? 'bg-blue-100 border-blue-500'
+                  activeUserId === user?._id
+                    ? 'bg-blue-100 border-blue-500' // Highlight if this user is active
                     : 'hover:bg-gray-100'
                 }`}
               >
-                <div className='flex items-center space-x-3'>
-                  <div className='w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center'>
-                    <span className='text-white font-semibold'>
-                      {(user?.name || '?').charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                  <div>
-                    <h3 className='font-medium text-gray-900'>
-                      {user?.name || 'Unknown User'}
-                    </h3>
-                    <p className='text-sm text-gray-500'>
-                      {user?.email || 'No user email provided'}
-                    </p>
-                  </div>
+                <div className="flex flex-col">
+                  <h3 className="font-medium text-gray-900">
+                    User ID: {user?._id} {/* Display MongoDB `_id` */}
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    Email: {user?.email || 'No email provided'} {/* Display user's email */}
+                  </p>
                 </div>
               </li>
             ))}

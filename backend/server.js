@@ -13,6 +13,7 @@ const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const cors = require('cors'); // CORS middleware
 const authenticate = require('./middleware/authMiddleware'); // JWT middleware
 const User = require('./models/User'); // Import User model
+const userRoutes = require('./routes/userRoutes'); // Import the userRoutes
 
 // Load environment variables from .env
 dotenv.config();
@@ -76,6 +77,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/messages', messageRoutes); // Add message routes
 app.use('/api/protected', protectedRoutes); // Use JWT middleware for protected routes
+app.use('/api/users', userRoutes); // User-related routes to fetch all users
 
 // Endpoint to handle multimedia uploads
 app.post('/api/upload', upload.single('file'), (req, res) => {

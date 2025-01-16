@@ -43,7 +43,7 @@ connectDB()
   .then(() => console.log('MongoDB connection successful'))
   .catch((err) => console.error('Error connecting to MongoDB:', err));
 
-// Configure Cloudinary
+// Configure Cloudinary using environment variables
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -82,11 +82,19 @@ app.use('/api/users', userRoutes); // User-related routes to fetch all users
 // Endpoint to handle multimedia uploads
 app.post('/api/upload', upload.single('file'), (req, res) => {
   try {
+    // Ensure file is uploaded
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded.' });
+    }
+
+    // Return file URL and public ID from cloudinary as the response
     res.status(200).json({
       url: req.file.path, // Cloudinary URL
       public_id: req.file.filename, // File identifier in Cloudinary
     });
   } catch (err) {
+    // Handle file upload errors
+    console.error('File upload error:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
@@ -94,10 +102,15 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
 // Add a new route to get the list of all users, excluding the logged-in user
 app.get('/api/users', authenticate, async (req, res) => {
   try {
+    if (!req.user?.id) {
+      return res.status(400).json({ error: 'User not authenticated' });
+    }
+
     // Fetch all users except the currently authenticated user (req.user.id)
     const users = await User.find({ _id: { $ne: req.user.id } });
     res.json(users); // Send the list of users as a response
   } catch (err) {
+    console.error('Error fetching users:', err.message);
     res.status(500).json({ error: 'Error fetching users' });
   }
 });

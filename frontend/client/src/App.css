@@ -1,224 +1,286 @@
-/* Font Import */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;1,400;1,500&display=swap');
+/* ==========================================
+   Global Styles: Reset and Font
+   ========================================== */
 
-/* Universal Reset and Font Family */
-* {
+/* 
+   Resetting the default margin, padding, and box-sizing to ensure consistent layout.
+   Also, setting a global font-family to Poppins for a clean and modern look.
+   */
+   * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Poppins', sans-serif; /* Fallback in case Tailwind doesn't load */
 }
 
 body {
-    background-color: #f5f5f5; /* Neutral background */
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    background-color: #f5f5f5; /* Light neutral background for the whole app */
+    min-height: 100vh; /* Full viewport height */
+    display: flex; /* Using flexbox for centering content */
+    justify-content: center; /* Center content horizontally */
+    align-items: center; /* Center content vertically */
 }
 
-/* App Container */
+/* ==========================================
+   Main App Container Styles
+   ========================================== */
+
+/*
+   .app contains the entire app's layout. This class is used for:
+   - Centering the content with a max width of 1200px.
+   - Giving the app a white background, rounded corners, and soft shadows.
+   - Overflow handling to prevent content from spilling over the edges.
+   - Flexbox layout to manage column-based structure.
+   */
 .app {
     width: 100%;
-    max-width: 1200px;
-    margin: auto;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    height: 90vh;
+    max-width: 1200px; /* Maximum width for large screens */
+    margin: auto; /* Auto margin for center alignment */
+    background-color: #fff; /* White background for the app container */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+    overflow: hidden; /* Prevent content overflow */
+    display: flex; /* Flexbox layout for column structure */
+    flex-direction: column; /* Stack elements vertically */
+    height: 90vh; /* Set height to 90% of the viewport height */
 }
 
-/* Navbar */
+/* ==========================================
+   Navbar Styles
+   ========================================== */
+
+/*
+   The navbar is used to display the app's logo and links.
+   - Background color, text color, padding, and flex properties are applied to ensure layout consistency.
+   */
 .navbar {
-    background-color: #4a4e69;
-    color: #fff;
-    padding: 10px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    background-color: #4a4e69; /* Dark purple background */
+    color: #fff; /* White text for contrast */
+    padding: 10px 20px; /* Spacing for the navbar */
+    display: flex; /* Flexbox for layout */
+    justify-content: space-between; /* Space between items */
+    align-items: center; /* Align items vertically */
 }
 
 .navbar .logo {
-    font-size: 24px;
-    font-weight: 500;
+    font-size: 24px; /* Larger font size for logo */
+    font-weight: 500; /* Medium font weight */
 }
 
-/* Form Styling */
+/* ==========================================
+   Form Styles (Login, Registration, etc.)
+   ========================================== */
+
+/*
+   The form container centers the form elements on the page.
+   The form itself is styled with padding, background color, shadow, and rounded corners.
+*/
 .form-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-grow: 1;
-    padding: 20px;
+    display: flex; /* Flexbox for centering form content */
+    justify-content: center; /* Horizontal centering */
+    align-items: center; /* Vertical centering */
+    flex-grow: 1; /* Allow form container to grow within its container */
+    padding: 20px; /* Padding around the form */
 }
 
+/*
+   Basic form styling to give it a card-like appearance with white background and rounded corners.
+   */
 form {
-    background: #ffffff;
-    width: 100%;
-    max-width: 400px;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    background: #ffffff; /* White background for the form */
+    width: 100%; /* Full width */
+    max-width: 400px; /* Limit form width */
+    padding: 20px; /* Padding inside the form */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Light shadow for a 3D effect */
 }
 
+/* Form heading styling */
 form h2 {
-    margin-bottom: 20px;
-    font-size: 24px;
-    color: #4a4e69;
-    text-align: center;
+    margin-bottom: 20px; /* Space below the heading */
+    font-size: 24px; /* Larger font size for heading */
+    color: #4a4e69; /* Matching purple color for consistency */
+    text-align: center; /* Center the heading */
 }
 
+/* Form group for input fields and labels */
 form .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 15px; /* Space between each form group */
 }
 
 form .form-group label {
-    display: block;
-    margin-bottom: 5px;
-    color: #333;
+    display: block; /* Make label block-level for proper spacing */
+    margin-bottom: 5px; /* Space below the label */
+    color: #333; /* Dark text for better readability */
 }
 
+/* Form input field styles */
 form .form-group input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    width: 100%; /* Full width of the parent container */
+    padding: 10px; /* Padding inside the input field */
+    border: 1px solid #ccc; /* Light border color */
+    border-radius: 4px; /* Rounded input corners */
 }
 
+/* Form button styles */
 form .form-group button {
-    width: 100%;
-    padding: 10px;
-    background-color: #003366;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    font-size: 16px;
-    cursor: pointer;
+    width: 100%; /* Full width button */
+    padding: 10px; /* Padding inside the button */
+    background-color: #003366; /* Dark blue background for the button */
+    color: #fff; /* White text */
+    border: none; /* Remove default border */
+    border-radius: 4px; /* Rounded button corners */
+    font-size: 16px; /* Button text size */
+    cursor: pointer; /* Pointer cursor on hover */
 }
 
+/* Button hover effect */
 form .form-group button:hover {
-    background-color: #001a4d;
+    background-color: #001a4d; /* Darker blue on hover */
 }
 
-/* Chat Section Styling */
+/* ==========================================
+   Chat Section Styles
+   ========================================== */
+
+/*
+   .chat-container holds all chat-related elements including the header and messages.
+   Flexbox is used for a column-based layout where the header, messages, and input are stacked vertically.
+   */
 .chat-container {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
+    flex-grow: 1; /* Let the chat container expand vertically */
+    display: flex; /* Use flexbox for layout */
+    flex-direction: column; /* Stack elements vertically */
 }
 
+/*
+   The chat header contains the user information and controls (like closing the chat).
+   - Flex properties are applied to align items and ensure space distribution.
+   */
 .chat-header {
-    padding: 10px 20px;
-    background-color: #4a4e69;
-    color: #fff;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    padding: 10px 20px; /* Spacing inside the header */
+    background-color: #4a4e69; /* Dark purple background */
+    color: #fff; /* White text */
+    display: flex; /* Flexbox for alignment */
+    justify-content: space-between; /* Space between user name and other controls */
+    align-items: center; /* Vertical centering */
 }
 
-.chat-header h3 {
-    margin: 0;
-}
-
-/* Chat Messages */
+/* Styling for the chat message list */
 .chat-messages {
-    flex-grow: 1;
-    padding: 20px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    background-color: #f0f0f0;
+    flex-grow: 1; /* Take up remaining space */
+    padding: 20px; /* Padding around the messages */
+    overflow-y: auto; /* Scrollable area for messages */
+    display: flex; /* Flexbox for message alignment */
+    flex-direction: column; /* Stack messages vertically */
+    gap: 10px; /* Space between messages */
+    background-color: #f0f0f0; /* Light gray background */
 }
 
+/* Message styling: for both sent and received messages */
 .message {
-    max-width: 70%;
-    padding: 10px 15px;
-    border-radius: 20px;
-    font-size: 16px;
-    line-height: 1.5;
+    max-width: 70%; /* Limit message width */
+    padding: 10px 15px; /* Padding for content */
+    border-radius: 20px; /* Rounded message corners */
+    font-size: 16px; /* Font size for message content */
+    line-height: 1.5; /* Line height for better readability */
 }
 
+/* Sent message styling */
 .message.sent {
-    background-color: #003366;
-    color: #fff;
-    align-self: flex-end;
-    border-bottom-right-radius: 0;
+    background-color: #003366; /* Dark blue background for sent messages */
+    color: #fff; /* White text */
+    align-self: flex-end; /* Align to the right */
+    border-bottom-right-radius: 0; /* Rounded corners for the left side */
 }
 
+/* Received message styling */
 .message.received {
-    background-color: #e0e0e0;
-    align-self: flex-start;
-    border-bottom-left-radius: 0;
+    background-color: #e0e0e0; /* Light gray background for received messages */
+    align-self: flex-start; /* Align to the left */
+    border-bottom-left-radius: 0; /* Rounded corners for the right side */
 }
 
-/* Tweet-like Message Style */
+/* Tweet-like Message Styling */
 .message.tweet {
-    background-color: #1da1f2;
-    color: #fff;
-    align-self: center;
-    border-radius: 15px;
-    padding: 10px 20px;
-    font-style: italic;
+    background-color: #1da1f2; /* Twitter blue */
+    color: #fff; /* White text */
+    align-self: center; /* Center the message */
+    border-radius: 15px; /* Rounded corners */
+    padding: 10px 20px; /* Padding for content */
+    font-style: italic; /* Italic font for tweet-like effect */
 }
 
-/* Chat Input */
+/* ==========================================
+   Chat Input Styles
+   ========================================== */
+
+/*
+   The chat input section allows users to type and send messages, including multimedia attachments.
+   - Flexbox is used to align the input field and send button.
+   */
 .chat-input {
-    display: flex;
-    padding: 10px;
-    border-top: 1px solid #ccc;
-    background-color: #fff;
+    display: flex; /* Flexbox for alignment */
+    padding: 10px; /* Padding inside the input section */
+    border-top: 1px solid #ccc; /* Border on top of the input section */
+    background-color: #fff; /* White background */
 }
 
+/* Input field for typing messages */
 .chat-input input {
-    flex-grow: 1;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 20px;
-    margin-right: 10px;
+    flex-grow: 1; /* Input takes the remaining space */
+    padding: 10px; /* Padding inside the input field */
+    border: 1px solid #ccc; /* Light border */
+    border-radius: 20px; /* Rounded input corners */
+    margin-right: 10px; /* Space between input and button */
 }
 
+/* Button for sending messages */
 .chat-input button {
-    background-color: #003366;
-    color: #fff;
-    border: none;
-    border-radius: 50%;
-    padding: 10px;
-    cursor: pointer;
-    width: 45px;
-    height: 45px;
+    background-color: #003366; /* Dark blue background */
+    color: #fff; /* White text */
+    border: none; /* Remove border */
+    border-radius: 50%; /* Circular button */
+    padding: 10px; /* Padding for the button */
+    cursor: pointer; /* Pointer cursor on hover */
+    width: 45px; /* Fixed width */
+    height: 45px; /* Fixed height */
 }
 
+/* Button hover effect */
 .chat-input button:hover {
-    background-color: #001a4d;
+    background-color: #001a4d; /* Darker shade on hover */
 }
 
-/* Responsive */
+/* ==========================================
+   Responsive Styles for Mobile Devices
+   ========================================== */
+
+/*
+   Media query for screens smaller than 768px to ensure the app looks good on mobile devices.
+   */
 @media (max-width: 768px) {
     .app {
-        height: 100vh;
+        height: 100vh; /* Ensure the app takes up the full viewport height */
     }
 
     .navbar {
-        font-size: 18px;
+        font-size: 18px; /* Smaller font size for mobile */
     }
 
     form {
-        padding: 15px;
+        padding: 15px; /* Less padding for mobile form */
     }
 
     .chat-header {
-        padding: 10px;
+        padding: 10px; /* Less padding for mobile chat header */
     }
 
     .chat-messages {
-        padding: 10px;
+        padding: 10px; /* Adjust padding for messages */
     }
 
     .chat-input {
-        padding: 5px;
+        padding: 5px; /* Less padding for input field */
     }
 }

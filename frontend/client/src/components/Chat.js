@@ -7,29 +7,33 @@ import ChatWindow from './chatwindow';
 
 /**
  * Chat Component
- * This component manages the entire chat functionality, including user authentication,
- * user selection, real-time messaging via Socket.IO, and message handling.
+ * This component manages the entire chat functionality, including:
+ * - User authentication and fetching user details
+ * - Real-time messaging using Socket.IO
+ * - Sending and receiving messages
+ * - File attachment support
  */
 function Chat() {
   // State variables
   const [messages, setMessages] = useState([]); // Current chat messages
   const [message, setMessage] = useState(''); // User's message input
   const [file, setFile] = useState(null); // Selected file for upload
-  const [fileName, setFileName] = useState(''); // File name for display
+  const [fileName, setFileName] = useState(''); // Name of the selected file
   const [userId, setUserId] = useState(null); // Logged-in user's ID
-  const [users, setUsers] = useState([]); // List of all users excluding current user
-  const [receiverId, setReceiverId] = useState(null); // Selected user's ID for chat
+  const [users, setUsers] = useState([]); // List of available users for chat
+  const [receiverId, setReceiverId] = useState(null); // Selected chat partner's ID
   const [searchTerm, setSearchTerm] = useState(''); // Search term for user filtering
-  const socketRef = useRef(null); // Reference for socket connection
+  const socketRef = useRef(null); // Reference to the Socket.IO connection
   const navigate = useNavigate(); // Navigation hook for routing
 
   /**
-   * Fetch user data and authenticate user.
-   * Runs once on component mount.
+   * Authenticate the user and fetch user-related data on component mount.
    */
   useEffect(() => {
     const authenticateUser = async () => {
-      const token = localStorage.getItem('token'); // Get JWT token from localStorage
+      const token = localStorage.getItem('token'); // Retrieve JWT token from localStorage
+
+      // Redirect to login if the token is missing
       if (!token) {
         alert('You are not logged in!');
         navigate('/login');
@@ -41,29 +45,32 @@ function Chat() {
         const userResponse = await axios.get('/auth/user', {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setUserId(userResponse.data.id); // Set the logged-in user's ID
+        setUserId(userResponse.data.id); // Set logged-in user's ID
 
-        // Fetch list of all users excluding the current user
+        // Fetch list of users excluding the current user
         const usersResponse = await axios.get('/users', {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setUsers(usersResponse.data); // Set the list of users
+        setUsers(usersResponse.data); // Set available users
       } catch (error) {
         console.error('Error fetching user data:', error);
         alert('Session expired. Please log in again.');
-        localStorage.removeItem('token');
+        localStorage.removeItem('token'); // Clear invalid token
         navigate('/login');
       }
     };
 
+    // Authenticate and initialize the user data
     authenticateUser();
 
-    // Initialize socket connection
+    // Initialize Socket.IO connection
     if (!socketRef.current) {
       socketRef.current = connectSocket();
+
+      // Listen for incoming messages
       if (socketRef.current) {
         socketRef.current.on('receiveMessage', (newMessage) => {
-          setMessages((prevMessages) => [...prevMessages, newMessage]); // Add incoming message to chat
+          setMessages((prevMessages) => [...prevMessages, newMessage]);
         });
 
         socketRef.current.on('disconnect', () => {
@@ -74,7 +81,7 @@ function Chat() {
       }
     }
 
-    // Cleanup socket connection on unmount
+    // Cleanup the socket connection on component unmount
     return () => {
       if (socketRef.current) {
         socketRef.current.disconnect();
@@ -84,7 +91,7 @@ function Chat() {
   }, [navigate]);
 
   /**
-   * Fetch messages for the selected receiver whenever `receiverId` changes.
+   * Fetch messages when a new receiver is selected.
    */
   useEffect(() => {
     if (receiverId) {
@@ -104,19 +111,37 @@ function Chat() {
   }, [receiverId]);
 
   /**
-   * Send a new message with optional file attachment.
+   * Handle sending a new message with optional file attachment.
+   * @param {Event} e - Form submission event
    */
   const handleSendMessage = async (e) => {
     e.preventDefault();
+
+    // Validate that a recipient is selected
+    if (!receiverId) {
+      alert('Please select a user to chat with.');
+      return;
+    }
+
+    // Validate that either a message or file is provided
+    if (!message && !file) {
+      alert('Please enter a message or attach a file.');
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file && file.size > 10 * 1024 * 1024) {
+      alert('File size exceeds 10MB. Please select a smaller file.');
+      return;
+    }
 
     const formData = new FormData();
     formData.append('senderId', userId);
     formData.append('receiverId', receiverId);
     formData.append('content', message);
+    if (file) formData.append('file', file);
 
-    if (file) {
-      formData.append('file', file);
-    }
+    console.log('Sending message with:', { userId, receiverId, message, file });
 
     try {
       const response = await axios.post('/chat/send', formData, {
@@ -128,19 +153,22 @@ function Chat() {
 
       const sentMessage = response.data;
       if (socketRef.current) {
-        socketRef.current.emit('sendMessage', sentMessage);
+        socketRef.current.emit('sendMessage', sentMessage); // Notify other users via Socket.IO
       }
 
-      setMessage(''); // Clear message input
+      // Clear the input fields
+      setMessage('');
       setFile(null);
       setFileName('');
     } catch (error) {
       console.error('Error sending message:', error);
+      alert('Failed to send message. Please try again.');
     }
   };
 
   /**
    * Handle file selection for upload.
+   * @param {Event} e - File input change event
    */
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -151,14 +179,15 @@ function Chat() {
   };
 
   /**
-   * Update selected user and clear previous messages.
+   * Update the selected user and reset the message list.
+   * @param {string} id - ID of the selected user
    */
   const handleUserClick = (id) => {
     setReceiverId(id);
     setMessages([]);
   };
 
-  // Filter users based on search term (by `_id` or `email`)
+  // Filter users based on the search term
   const filteredUsers = users.filter(
     (user) =>
       user._id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -199,11 +228,11 @@ function Chat() {
 
 /**
  * Establish a Socket.IO connection.
- * @returns {Socket} The Socket.IO client instance
+ * @returns {Socket | null} The Socket.IO client instance or null if connection fails
  */
 const connectSocket = () => {
   try {
-    const socket = io('http://localhost:5000'); // This is my Backend URL
+    const socket = io('http://localhost:5000'); // Backend URL
     return socket;
   } catch (error) {
     console.error('Socket connection failed:', error);

@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true, // Prevent duplicate email addresses
-    trim: true,   // Remove leading/trailing spaces
+    trim: true, // Remove leading/trailing spaces
     lowercase: true, // Convert email to lowercase for consistency
   },
   password: {
@@ -25,9 +25,9 @@ const userSchema = new mongoose.Schema({
   },
   contact: {
     type: String,
-    required: true,  // Ensures contact info is always provided
-    unique: true,    // Optional: make contact information unique (if necessary)
-    trim: true,      // Removes extra spaces
+    required: false, // Ensures contact info is always provided
+    unique: true, // Optional: make contact information unique (if necessary)
+    trim: true, // Removes extra spaces
   },
 });
 

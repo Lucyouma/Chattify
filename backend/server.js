@@ -13,7 +13,8 @@ const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const cors = require('cors'); // CORS middleware
 const authenticate = require('./middleware/authMiddleware'); // JWT middleware
 const User = require('./models/User'); // Import User model
-const userRoutes = require('./routes/userRoutes'); // Import the userRoutes
+const Chat = require('./models/Chat'); // Import Chat model
+const Message = require('./models/Message'); // Import Message model
 
 // Load environment variables from .env
 dotenv.config();
@@ -32,9 +33,9 @@ app.use(express.json());
 // CORS configuration
 app.use(
   cors({
-    origin: 'http://localhost:3000', // My Frontend URL
+    origin: 'http://localhost:3000', // Frontend URL (ensure it's correct)
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true, // Allows cookies
+    credentials: true, // Allows cookies if required
   })
 );
 
@@ -43,7 +44,7 @@ connectDB()
   .then(() => console.log('MongoDB connection successful'))
   .catch((err) => console.error('Error connecting to MongoDB:', err));
 
-// Configure Cloudinary using environment variables
+// Configure Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -77,24 +78,15 @@ app.use('/api/auth', authRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/messages', messageRoutes); // Add message routes
 app.use('/api/protected', protectedRoutes); // Use JWT middleware for protected routes
-app.use('/api/users', userRoutes); // User-related routes to fetch all users
 
 // Endpoint to handle multimedia uploads
 app.post('/api/upload', upload.single('file'), (req, res) => {
   try {
-    // Ensure file is uploaded
-    if (!req.file) {
-      return res.status(400).json({ error: 'No file uploaded.' });
-    }
-
-    // Return file URL and public ID from cloudinary as the response
     res.status(200).json({
       url: req.file.path, // Cloudinary URL
       public_id: req.file.filename, // File identifier in Cloudinary
     });
   } catch (err) {
-    // Handle file upload errors
-    console.error('File upload error:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
@@ -102,16 +94,85 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
 // Add a new route to get the list of all users, excluding the logged-in user
 app.get('/api/users', authenticate, async (req, res) => {
   try {
-    if (!req.user?.id) {
-      return res.status(400).json({ error: 'User not authenticated' });
-    }
-
     // Fetch all users except the currently authenticated user (req.user.id)
     const users = await User.find({ _id: { $ne: req.user.id } });
     res.json(users); // Send the list of users as a response
   } catch (err) {
-    console.error('Error fetching users:', err.message);
     res.status(500).json({ error: 'Error fetching users' });
+  }
+});
+
+// Endpoint to create or retrieve a chat between two users
+app.post('/api/chat', authenticate, async (req, res) => {
+  const { recipientId } = req.body; // ID of the user to chat with
+  const currentUserId = req.user.id;
+
+  if (!recipientId) {
+    return res.status(400).json({ error: 'Recipient ID is required' });
+  }
+
+  try {
+    // Check if a chat already exists between the two users
+    let chat = await Chat.findOne({
+      users: { $all: [currentUserId, recipientId] }, // Check if both users are in the chat
+    });
+
+    // If no chat exists, create a new one
+    if (!chat) {
+      chat = await Chat.create({ users: [currentUserId, recipientId], messages: [] });
+    }
+
+    res.json(chat); // Return the chat object
+  } catch (err) {
+    console.error('Error creating or retrieving chat:', err);
+    res.status(500).json({ error: 'An error occurred while creating/retrieving the chat' });
+  }
+});
+
+// Endpoint to retrieve messages for a chat
+app.get('/api/chat/:chatId/messages', authenticate, async (req, res) => {
+  const { chatId } = req.params;
+
+  try {
+    // Fetch messages for the given chat
+    const messages = await Message.find({ chatId }).sort({ createdAt: 1 }); // Sort by creation time
+    res.json(messages); // Return the messages
+  } catch (err) {
+    console.error('Error fetching messages:', err);
+    res.status(500).json({ error: 'An error occurred while fetching messages' });
+  }
+});
+
+// Endpoint to send a message in a chat
+app.post('/api/chat/:chatId/send', authenticate, async (req, res) => {
+  const { chatId } = req.params;
+  const { content } = req.body;
+  const senderId = req.user.id;
+
+  if (!content) {
+    return res.status(400).json({ error: 'Message content is required' });
+  }
+
+  try {
+    // Create and save a new message
+    const message = await Message.create({
+      chatId,
+      sender: senderId,
+      content,
+      createdAt: new Date(),
+    });
+
+    // Optionally push the message to the chat's message array (depends on your schema)
+    await Chat.findByIdAndUpdate(chatId, { $push: { messages: message._id } });
+
+    // Emit the message to other users in real-time using Socket.io
+    const chat = await Chat.findById(chatId).populate('users', 'name email'); // Populate user details
+    req.io.to(chatId).emit('newMessage', message);
+
+    res.status(201).json(message);
+  } catch (err) {
+    console.error('Error sending message:', err);
+    res.status(500).json({ error: 'An error occurred while sending the message' });
   }
 });
 
@@ -119,24 +180,33 @@ app.get('/api/users', authenticate, async (req, res) => {
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: 'http://localhost:3000', // My frontend URL
+    origin: 'http://localhost:3000', // Ensure this is the correct frontend URL
     methods: ['GET', 'POST'],
   },
+});
+
+// Attach Socket.io to the request object
+app.use((req, res, next) => {
+  req.io = io;
+  next();
 });
 
 // Socket.io events
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
 
-  // Listen for incoming messages
-  socket.on('sendMessage', (message) => {
-    console.log('Message received:', message);
-    // Broadcast message to all connected users
-    io.emit('receiveMessage', message); // Broadcast message to all users
-    socket.emit('messageStatus', { status: 'delivered' }); // Acknowledge message delivery
+  // Join a chat room
+  socket.on('joinChat', (chatId) => {
+    socket.join(chatId);
+    console.log(`User joined chat room: ${chatId}`);
   });
 
-  // Handle user disconnection
+  // Send message to a specific chat room
+  socket.on('sendMessage', (data) => {
+    const { chatId, message } = data;
+    io.to(chatId).emit('receiveMessage', message);
+  });
+
   socket.on('disconnect', () => {
     console.log('A user disconnected:', socket.id);
   });

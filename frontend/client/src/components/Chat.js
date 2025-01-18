@@ -47,6 +47,9 @@ function Chat() {
         });
         setUserId(userResponse.data.id); // Set logged-in user's ID
 
+        // Store senderId in localStorage for future use
+        localStorage.setItem('senderId', userResponse.data.id);
+
         // Fetch list of users excluding the current user
         const usersResponse = await axios.get('/users', {
           headers: { Authorization: `Bearer ${token}` },
@@ -97,9 +100,19 @@ function Chat() {
     if (receiverId) {
       const fetchMessages = async () => {
         try {
-          const response = await axios.get(`/chat/${receiverId}`, {
+          // Retrieve senderId from localStorage
+          const senderId = localStorage.getItem('senderId'); // Fetch the senderId directly from localStorage
+          if (!senderId) {
+            console.error('Sender ID not found');
+            alert('You are not logged in! Please log in again.');
+            return;
+          }
+
+          // Make the request to fetch messages
+          const response = await axios.get(`/api/chat/${senderId}/${receiverId}`, {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
           });
+
           setMessages(response.data); // Update chat messages
         } catch (error) {
           console.error('Error fetching messages:', error);
@@ -108,7 +121,7 @@ function Chat() {
 
       fetchMessages();
     }
-  }, [receiverId]);
+  }, [receiverId]); // Now userId is no longer a dependency here since senderId is taken from localStorage
 
   /**
    * Handle sending a new message with optional file attachment.
@@ -135,13 +148,22 @@ function Chat() {
       return;
     }
 
+    // Retrieve senderId from localStorage
+    const senderId = localStorage.getItem('senderId');
+    if (!senderId) {
+      console.error('Sender ID not found');
+      alert('You are not logged in! Please log in again.');
+      return;
+    }
+
+    // Prepare the FormData to send in the request
     const formData = new FormData();
-    formData.append('senderId', userId);
+    formData.append('senderId', senderId); // Using the senderId from localStorage
     formData.append('receiverId', receiverId);
     formData.append('content', message);
     if (file) formData.append('file', file);
 
-    console.log('Sending message with:', { userId, receiverId, message, file });
+    console.log('Sending message with:', { senderId, receiverId, message, file });
 
     try {
       const response = await axios.post('/chat/send', formData, {
@@ -184,7 +206,7 @@ function Chat() {
    */
   const handleUserClick = (id) => {
     setReceiverId(id);
-    setMessages([]);
+    setMessages([]); // Reset messages when a new user is selected
   };
 
   // Filter users based on the search term

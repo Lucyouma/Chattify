@@ -5,8 +5,8 @@ const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const chatRoutes = require('./routes/chatRoutes');
-const messageRoutes = require('./routes/Message'); // Import message routes
-const protectedRoutes = require('./routes/protectedRoutes'); // Protected routes
+const messageRoutes = require('./routes/Message');
+const protectedRoutes = require('./routes/protectedRoutes');
 const multer = require('multer'); // For handling file uploads
 const cloudinary = require('cloudinary').v2; // Cloudinary integration
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
@@ -105,7 +105,7 @@ app.get('/api/users', authenticate, async (req, res) => {
 // Endpoint to create or retrieve a chat between two users
 app.post('/api/chat', authenticate, async (req, res) => {
   const { recipientId } = req.body; // ID of the user to chat with
-  const currentUserId = req.user.id;
+  const currentUserId = req.user.id; // The logged-in user's ID (sender)
 
   if (!recipientId) {
     return res.status(400).json({ error: 'Recipient ID is required' });
@@ -146,18 +146,32 @@ app.get('/api/chat/:chatId/messages', authenticate, async (req, res) => {
 // Endpoint to send a message in a chat
 app.post('/api/chat/:chatId/send', authenticate, async (req, res) => {
   const { chatId } = req.params;
-  const { content } = req.body;
-  const senderId = req.user.id;
+  const { content, recipientId } = req.body; // recipientId from the frontend
+  const senderId = req.user.id; // The logged-in user's ID
 
+  // Validate the message content
   if (!content) {
     return res.status(400).json({ error: 'Message content is required' });
   }
 
   try {
-    // Create and save a new message
+    // Fetch the sender from the database
+    const sender = await User.findById(senderId);
+    if (!sender) {
+      return res.status(400).json({ error: 'Sender not found in the database.' });
+    }
+
+    // Fetch the recipient from the database
+    const recipient = await User.findById(recipientId);
+    if (!recipient) {
+      return res.status(400).json({ error: 'Recipient not found in the database.' });
+    }
+
+    // Create and save the new message
     const message = await Message.create({
       chatId,
       sender: senderId,
+      receiver: recipientId, // Include recipientId in the message
       content,
       createdAt: new Date(),
     });

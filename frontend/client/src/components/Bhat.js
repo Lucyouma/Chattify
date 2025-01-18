@@ -91,7 +91,9 @@ function Chat() {
       const fetchMessages = async () => {
         try {
           const response = await axios.get(`/chat/${receiverId}`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
           });
           setMessages(response.data); // Update chat messages
         } catch (error) {
@@ -162,16 +164,16 @@ function Chat() {
   const filteredUsers = users.filter(
     (user) =>
       user._id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email?.toLowerCase().includes(searchTerm.toLowerCase())
+      user.email?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
-    <div className="chat-container">
-      <header className="chat-header">
-        <h1 className="chat-title">Chat</h1>
+    <div className='chat-container'>
+      <header className='chat-header'>
+        <h1 className='chat-title'>Chat</h1>
       </header>
 
-      <div className="flex h-screen">
+      <div className='flex h-screen'>
         {/* User selection panel */}
         <UserSelectionContainer
           users={filteredUsers}

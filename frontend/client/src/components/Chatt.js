@@ -108,17 +108,10 @@ function Chat() {
     }
   };
 
-  // Handle selecting a user for chatting, including self-messaging
+  // Handle selecting a user for chatting
   const handleUserClick = (id) => {
-    if (id === userId) {
-      // Allow messaging to self, same as messaging another user
-      setReceiverId(id);
-      setMessages([]); // Clear previous messages
-    } else {
-      // Proceed with normal user selection
-      setReceiverId(id);
-      setMessages([]); // Clear previous messages
-    }
+    setReceiverId(id);
+    setMessages([]); // Clear messages when a new user is selected
   };
 
   // Filter users based on search term
@@ -130,9 +123,9 @@ function Chat() {
 
   return (
     <div className='chat-container'>
-      {/* <header className='chat-header'>
+      <header className='chat-header'>
         <h1 className='chat-title'>Chat</h1>
-      </header> */}
+      </header>
 
       <div className='chat-body'>
         {/* Left Panel: User Selection */}
@@ -160,29 +153,29 @@ function Chat() {
             fileName={fileName}
           />
         </main>
-
-        {/* Bottom Panel: Chat Input Box */}
-        <footer className='chat-input'>
-          <form onSubmit={handleSendMessage}>
-            <input
-              type='text'
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder='Type a message...'
-              className='message-input'
-            />
-            <input
-              type='file'
-              onChange={handleFileChange}
-              className='file-input'
-              hidden
-            />
-            <button type='submit' className='send-button'>
-              Send
-            </button>
-          </form>
-        </footer>
       </div>
+
+      {/* Chat Input Box */}
+      <footer className='chat-input'>
+        <form onSubmit={handleSendMessage}>
+          <input
+            type='text'
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder='Type a message...'
+            className='message-input'
+          />
+          <input
+            type='file'
+            onChange={handleFileChange}
+            className='file-input'
+            hidden
+          />
+          <button type='submit' className='send-button'>
+            Send
+          </button>
+        </form>
+      </footer>
     </div>
   );
 }

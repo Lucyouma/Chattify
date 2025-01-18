@@ -2,12 +2,12 @@ import { io } from 'socket.io-client';
 
 // Initialize Socket.io client with necessary configurations
 const socket = io('http://localhost:5000', {
-  transports: ['websocket'],  // Use WebSocket for better performance
-  autoConnect: false,         // Prevent auto-connection; you will connect manually
-  reconnection: true,         // Automatically reconnect if disconnected
-  reconnectionAttempts: 5,    // Number of reconnection attempts
-  reconnectionDelay: 1000,    // Delay between reconnection attempts
-  reconnectionDelayMax: 5000  // Maximum delay for reconnection
+  transports: ['websocket'], // Use WebSocket for better performance
+  autoConnect: false, // Prevent auto-connection; you will connect manually
+  reconnection: true, // Automatically reconnect if disconnected
+  reconnectionAttempts: 5, // Number of reconnection attempts
+  reconnectionDelay: 1000, // Delay between reconnection attempts
+  reconnectionDelayMax: 5000, // Maximum delay for reconnection
 });
 
 // Function to connect the socket manually
@@ -49,6 +49,17 @@ const listenForMessages = (callback) => {
   });
 };
 
+// Function to listen for chat history
+const listenForChatHistory = (callback) => {
+  // Ensure the listener is added only once
+  if (socket.hasListeners('receiveChatHistory')) return;
+
+  socket.on('receiveChatHistory', (history) => {
+    callback(history); // Execute the callback when chat history is received
+    console.log('Chat history received:', history);
+  });
+};
+
 // Function to disconnect the socket manually
 const disconnectSocket = () => {
   if (socket.connected) {
@@ -65,4 +76,11 @@ const getSocketStatus = () => {
 };
 
 // Export all the functions for use in other components
-export { connectSocket, sendMessage, listenForMessages, disconnectSocket, getSocketStatus };
+export {
+  connectSocket,
+  sendMessage,
+  listenForMessages,
+  listenForChatHistory,
+  disconnectSocket,
+  getSocketStatus,
+};

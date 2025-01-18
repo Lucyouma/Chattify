@@ -74,18 +74,3 @@ export const refreshTokenFunction = async () => {
     throw error; // Throw error to be handled by the calling code
   }
 };
-
-// utility function to fetch users from db
-export const fetchUsers = async (token) => {
-  try {
-    const response = await apiClient.get('/users', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data; // Return the user data fetched from the server
-  } catch (err) {
-    console.error('Error fetching user details:', err.message);
-    throw err; // Propagate the error for handling in the caller
-  }
-};

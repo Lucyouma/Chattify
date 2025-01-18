@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UserSelectionContainer from './userselection';
 import ChatWindow from './chatwindow';
-import { fetchUsers } from '../utils/api';
+import axios from '../utils/axios';
 import {
   connectSocket,
   sendMessage,
@@ -10,7 +10,6 @@ import {
   listenForChatHistory,
   disconnectSocket,
 } from '../socket';
-import axios from 'axios';
 
 /**
  * Chat Component
@@ -19,8 +18,6 @@ import axios from 'axios';
 function Chat() {
   const [messages, setMessages] = useState([]); // Current chat messages
   const [message, setMessage] = useState(''); // User's message input
-  const [loading, setLoading] = useState(true); // State to handle loading state
-  const [error, setError] = useState(null); // State to handle errors
   const [file, setFile] = useState(null); // Selected file for upload
   const [fileName, setFileName] = useState(''); // Name of the selected file
   const [userId, setUserId] = useState(null); // Logged-in user's ID
@@ -32,7 +29,7 @@ function Chat() {
 
   // Initialize user, fetch users and socket connection
   useEffect(() => {
-    const authenticateUser = () => {
+    const authenticateUser = async () => {
       const token = localStorage.getItem('token'); // Retrieve JWT token from localStorage
 
       if (!token) {
@@ -40,6 +37,19 @@ function Chat() {
         navigate('/login');
         return;
       }
+
+      //fetch users from db;
+      try {
+        const { data: userList } = await axios.get('/users', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setUsers(userList); // Properly update the state with fetched users
+      } catch (error) {
+        console.error('Error fetching users:', error);
+
+        return;
+      }
+      //fetch users from db fails
 
       // Extract user ID from token payload
       const userData = JSON.parse(atob(token.split('.')[1])); // Decode JWT payload
@@ -69,26 +79,7 @@ function Chat() {
       }
     };
   }, [navigate]);
-  useEffect(() => {
-    // Function to fetch users
-    const fetchUserList = async () => {
-      try {
-        const token = localStorage.getItem('token'); // Get the token from localStorage
-        if (!token) throw new Error('No authentication token found');
 
-        const userList = await fetchUsers(token); // Fetch users from the API
-        setUsers(userList); // Set the users list in state
-      } catch (err) {
-        setError(err.message); // Set error if fetching fails
-      } finally {
-        setLoading(false); // Stop loading state
-      }
-    };
-
-    fetchUserList();
-  }, []);
-
-  // Fetch messages for the selected user or when receiver is selected
   useEffect(() => {
     if (!receiverId && userId) {
       //default to self if no receiver selected

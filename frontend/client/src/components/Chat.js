@@ -4,95 +4,162 @@ import {
   sendMessage,
   listenForMessages,
   disconnectSocket,
-  getSocketStatus,
-} from '../socket'; // Adjust the import path as needed
+} from '../socket'; // Import functions from socket.js
+import axios from '../utils/axios';
+import { useNavigate } from 'react-router-dom';
+import UserSelectionContainer from './userselection';
+import ChatWindow from './chatwindow';
 
-const Chat = () => {
+function Chat() {
+  const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState('');
-  const [chatHistory, setChatHistory] = useState([]);
-  const [connectionStatus, setConnectionStatus] = useState(getSocketStatus());
+  const [file, setFile] = useState(null);
+  const [fileName, setFileName] = useState('');
+  const [userId, setUserId] = useState(null);
+  const [users, setUsers] = useState([]); // List of users
+  const [receiverId, setReceiverId] = useState(null); // The selected user's ID
+  const navigate = useNavigate();
 
+  // Authenticate user and fetch users
   useEffect(() => {
-    // Connect to the socket when the component mounts
-    connectSocket();
-    setConnectionStatus(getSocketStatus());
+    const authenticateUser = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('You are not logged in!');
+        navigate('/login');
+        return;
+      }
 
-    // Listen for incoming messages
-    listenForMessages((incomingMessage) => {
-      setChatHistory((prev) => [
-        ...prev,
-        { sender: 'Server', text: incomingMessage },
-      ]);
+      try {
+        const userResponse = await axios.get('/auth/user', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setUserId(userResponse.data.id);
+
+        const usersResponse = await axios.get('/users', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setUsers(
+          usersResponse.data.filter((user) => user.id !== userResponse.data.id),
+        );
+        console.log('users in db:', usersResponse.data);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        alert('Session expired. Please log in again.');
+        localStorage.removeItem('token');
+        navigate('/login');
+      }
+    };
+
+    authenticateUser();
+
+    // Connect to the socket and listen for messages
+    connectSocket();
+    listenForMessages((newMessage) => {
+      setMessages((prevMessages) => [...prevMessages, newMessage]);
     });
 
-    // Clean up by disconnecting the socket when the component unmounts
     return () => {
       disconnectSocket();
-      setConnectionStatus(getSocketStatus());
     };
-  }, []);
+  }, [navigate]);
 
-  const handleSendMessage = () => {
-    if (message.trim() !== '') {
-      sendMessage(message);
-      setChatHistory((prev) => [...prev, { sender: 'You', text: message }]);
-      setMessage(''); // Clear the input field
-    } else {
-      console.error('Message cannot be empty');
+  // Fetch messages when a receiver is selected
+  useEffect(() => {
+    if (receiverId) {
+      const fetchMessages = async () => {
+        try {
+          const response = await axios.get(`/chat/${receiverId}`, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+          });
+          setMessages(response.data);
+        } catch (error) {
+          console.error('Error fetching messages:', error);
+        }
+      };
+      fetchMessages();
+    }
+  }, [receiverId]);
+
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData();
+    formData.append('senderId', userId);
+    formData.append('receiverId', receiverId);
+    formData.append('content', message);
+
+    if (file) {
+      formData.append('file', file);
+    }
+
+    try {
+      const response = await axios.post('/chat/send', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+
+      const sentMessage = response.data;
+
+      // Emit message via socket
+      sendMessage(sentMessage);
+
+      // Clear inputs
+      setMessage('');
+      setFile(null);
+      setFileName('');
+    } catch (error) {
+      console.error('Error sending message:', error);
     }
   };
 
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+      setFileName(selectedFile.name);
+    }
+  };
+
+  const handleUserClick = (id) => {
+    setReceiverId(id);
+    setMessages([]); // Clear previous messages
+  };
+
+  const filteredUsers = users; // Use the full list of users directly
+
   return (
-    <div
-      style={{
-        maxWidth: '600px',
-        margin: 'auto',
-        fontFamily: 'Arial, sans-serif',
-      }}
-    >
-      <h2>Socket.io Chat</h2>
+    <div className='chat-container'>
+      <header className='chat-header'>
+        <h1 className='chat-title'>Chat</h1>
+      </header>
 
-      {/* Connection Status */}
-      <div>
-        <strong>Status:</strong> {connectionStatus}
-      </div>
-
-      {/* Chat History */}
-      <div
-        style={{
-          border: '1px solid #ccc',
-          padding: '10px',
-          marginTop: '10px',
-          height: '300px',
-          overflowY: 'scroll',
-          backgroundColor: '#f9f9f9',
-        }}
-      >
-        {chatHistory.map((entry, index) => (
-          <div key={index}>
-            <strong>{entry.sender}:</strong> {entry.text}
-          </div>
-        ))}
-      </div>
-
-      {/* Message Input and Send Button */}
-      <div style={{ marginTop: '10px' }}>
-        <input
-          type='text'
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder='Type your message'
-          style={{ width: '80%', padding: '10px' }}
+      <div className='flex h-screen'>
+        <UserSelectionContainer
+          users={filteredUsers}
+          handleUserClick={handleUserClick}
+          activeUserId={receiverId}
         />
-        <button
-          onClick={handleSendMessage}
-          style={{ padding: '10px', marginLeft: '10px' }}
-        >
-          Send
-        </button>
+
+        {/* Chat Window */}
+        <ChatWindow
+          messages={messages}
+          userId={userId}
+          receiverId={receiverId}
+          users={users}
+          message={message}
+          setMessage={setMessage}
+          handleSendMessage={handleSendMessage}
+          handleFileChange={handleFileChange}
+          fileName={fileName}
+        />
       </div>
     </div>
   );
-};
+}
 
 export default Chat;

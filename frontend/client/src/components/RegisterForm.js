@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { registerUser } from '../utils/api'; // Assuming registerUser is correctly implemented
+import { registerUser } from '../utils/api'; // RegisterUser is correctly implemented in util
 
 const RegisterForm = () => {
   const [email, setEmail] = useState('');
@@ -12,17 +12,18 @@ const RegisterForm = () => {
     setMessage(''); // Clear previous messages
     setLoading(true); // Set loading to true to show loading state
 
-    console.log('Registration attempt started'); // Debugging log to confirm function execution
+    console.log('Registration attempt started'); // Debugging log to confirm function is triggered
 
     try {
       const data = await registerUser({ email, password });
 
-      console.log('Response from registerUser:', data); // Log response from the API for debugging
+      console.log('Response from registerUser:', data); // Log response from the API
+
       if (data && typeof data.message === 'string') {
         setMessage(data.message); // Set success or error message from API response
       } else {
         setMessage(
-          'Registration successful! Please check your email to confirm.'
+          'Registration successful! Please check your email to confirm.',
         ); // Success message
       }
     } catch (error) {
@@ -32,10 +33,10 @@ const RegisterForm = () => {
       if (error.response && error.response.data) {
         setMessage(
           error.response.data.message ||
-            'Registration failed! Please try again.'
+            'Registration failed! Please try again.',
         );
       } else {
-        setMessage('An unexpected error occurred. Please try again later.'); // Generic error message
+        setMessage('An unexpected error occurred. Please try again later.'); // General error message
       }
     } finally {
       setLoading(false); // Reset loading state after request
@@ -52,11 +53,23 @@ const RegisterForm = () => {
             placeholder='Email'
             aria-label='Email'
             value={email}
-            onChange={(e) => setEmail(e.target.value)} // Update email state on input
+            onChange={(e) => setEmail(e.target.value)} // Update email state on input change
             required
             className='input-field'
           />
         </div>
+
+        {/* <div className='input-group'>
+          <PhoneInput
+            placeholder='Enter Phone number'
+            // onChange={(e) => setContact(e.target.value)} // Update phone contact on input change
+            // onChange={setContact}
+            value={contact}
+            onChange={(value) => setContact(value || null)}
+            required
+            className='input-field'
+          />
+        </div> */}
 
         <div className='input-group'>
           <input
@@ -64,17 +77,17 @@ const RegisterForm = () => {
             placeholder='Password'
             aria-label='Password'
             value={password}
-            onChange={(e) => setPassword(e.target.value)} // Update password state on input
+            onChange={(e) => setPassword(e.target.value)} // Update password state on input change
             required
             className='input-field'
           />
         </div>
-
         <button type='submit' className='submit-btn' disabled={loading}>
           {loading ? 'Registering...' : 'Register'}
         </button>
       </form>
-      {message && <p className='message'>{message}</p>} {/* Show success/error message */}
+      {message && <p className='message'>{message}</p>}
+      {/* Show success/error message */}
     </div>
   );
 };

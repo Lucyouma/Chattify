@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { io } from 'socket.io-client';
+// import { io } from 'socket.io-client';
 import axios from '../utils/axios';
 import { useNavigate } from 'react-router-dom';
 import UserSelectionContainer from './userselection';
@@ -109,9 +109,14 @@ function Chat() {
           }
 
           // Make the request to fetch messages
-          const response = await axios.get(`/api/chat/${senderId}/${receiverId}`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-          });
+          const response = await axios.get(
+            `/api/chat/${senderId}/${receiverId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`,
+              },
+            },
+          );
 
           setMessages(response.data); // Update chat messages
         } catch (error) {
@@ -163,7 +168,12 @@ function Chat() {
     formData.append('content', message);
     if (file) formData.append('file', file);
 
-    console.log('Sending message with:', { senderId, receiverId, message, file });
+    console.log('Sending message with:', {
+      senderId,
+      receiverId,
+      message,
+      file,
+    });
 
     try {
       const response = await axios.post('/chat/send', formData, {
@@ -213,16 +223,16 @@ function Chat() {
   const filteredUsers = users.filter(
     (user) =>
       user._id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email?.toLowerCase().includes(searchTerm.toLowerCase())
+      user.email?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
-    <div className="chat-container">
-      <header className="chat-header">
-        <h1 className="chat-title">Chat</h1>
+    <div className='chat-container'>
+      <header className='chat-header'>
+        <h1 className='chat-title'>Chat</h1>
       </header>
 
-      <div className="flex h-screen">
+      <div className='flex h-screen'>
         {/* User selection panel */}
         <UserSelectionContainer
           users={filteredUsers}

@@ -33,7 +33,7 @@ app.use(express.json());
 // CORS configuration
 app.use(
   cors({
-    origin: 'http://localhost:3000', // Frontend URL (ensure it's correct)
+    origin: 'http://localhost:3000', // Frontend URL
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true, // Allows cookies if required
   })
@@ -75,7 +75,7 @@ const upload = multer({
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/chat', chatRoutes);
+app.use('/api/chat/send', chatRoutes);
 app.use('/api/messages', messageRoutes); // Add message routes
 app.use('/api/protected', protectedRoutes); // Use JWT middleware for protected routes
 
@@ -176,11 +176,11 @@ app.post('/api/chat/:chatId/send', authenticate, async (req, res) => {
       createdAt: new Date(),
     });
 
-    // Optionally push the message to the chat's message array (depends on your schema)
+    // Push the message to the chat's message array
     await Chat.findByIdAndUpdate(chatId, { $push: { messages: message._id } });
 
     // Emit the message to other users in real-time using Socket.io
-    const chat = await Chat.findById(chatId).populate('users', 'name email'); // Populate user details
+    const chat = await Chat.findById(chatId).populate('users', 'email'); // Populate user details
     req.io.to(chatId).emit('newMessage', message);
 
     res.status(201).json(message);

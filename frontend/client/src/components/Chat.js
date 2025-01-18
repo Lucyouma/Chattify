@@ -109,7 +109,7 @@ function Chat() {
           }
 
           // Make the request to fetch messages
-          const response = await axios.get(`/api/chat/${senderId}/${receiverId}`, {
+          const response = await axios.get(`/api/chat/send/${senderId}/${receiverId}`, {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
           });
 
@@ -166,7 +166,7 @@ function Chat() {
     console.log('Sending message with:', { senderId, receiverId, message, file });
 
     try {
-      const response = await axios.post('/chat/send', formData, {
+      const response = await axios.post('/api/chat/send', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${localStorage.getItem('token')}`,

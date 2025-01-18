@@ -20,4 +20,4 @@ export const fetchUsers = async (token) => {
   }
 };
 
-export default instance;
+// export default instance;

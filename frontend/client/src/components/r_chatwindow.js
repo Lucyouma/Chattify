@@ -44,7 +44,7 @@ const ChatWindow = ({
           <div className='chat-messages'>
             {messages.map((msg, index) => (
               <div
-                key={msg._id || `${msg.senderId}-${msg.timestamp}-${index}`}
+                key={msg._id || `${msg.senderId}-${msg.timestamp}` || index}
                 className={msg.senderId === userId ? 'sent' : 'received'}
               >
                 <p>{msg.content}</p>

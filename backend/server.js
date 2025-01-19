@@ -15,6 +15,7 @@ const authenticate = require('./middleware/authMiddleware'); // JWT middleware
 const User = require('./models/User'); // Import User model
 const Chat = require('./models/Chat'); // Import Chat model
 const Message = require('./models/Message'); // Import Message model
+const activeUsers = new Map(); // Use Map to store userId -> socketId mappings
 
 // Load environment variables from .env
 dotenv.config();

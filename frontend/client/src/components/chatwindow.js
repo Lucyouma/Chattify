@@ -28,7 +28,15 @@ const ChatWindow = ({
   fileName,
 }) => {
   // Find the user object for the selected receiver
-  const selectedUser = users.find((user) => user.id === receiverId);
+  const selectedUser = users.find(
+    (user) => String(user._id) === String(receiverId),
+  );
+  //   || {
+  //     name: 'Yourself',
+  //   };
+  console.log('Receiver is id ', receiverId);
+  console.log('the users include', users);
+  console.log('and the selected user is ', selectedUser);
 
   return (
     <div className='flex-1 flex flex-col bg-gray-50'>
@@ -36,15 +44,13 @@ const ChatWindow = ({
       {receiverId && (
         <div className='chat-window'>
           {/* Chat header with the name of the person you are chatting with */}
-          <h3 className='chat-header'>
-            Chatting with: {selectedUser?.name}
-          </h3>
-          
+          <h3 className='chat-header'>Chatting with: {selectedUser?.email}</h3>
+
           {/* Display the chat messages */}
           <div className='chat-messages'>
-            {messages.map((msg) => (
+            {messages.map((msg, index) => (
               <div
-                key={msg._id || `${msg.senderId}-${msg.timestamp}`}
+                key={msg._id || `${msg.senderId}-${msg.timestamp}-${index}`}
                 className={msg.senderId === userId ? 'sent' : 'received'}
               >
                 <p>{msg.content}</p>
@@ -82,19 +88,19 @@ const ChatWindow = ({
               onChange={(e) => setMessage(e.target.value)}
               placeholder='Type a message...'
               required
-              className='message-box' // Ensure the message box is visible and well-sized
+              className='message-box'
             />
-            
+
             {/* File input for uploading files */}
             <input
               type='file'
               onChange={handleFileChange}
               className='file-input'
             />
-            
+
             {/* Display file name if a file is selected */}
             {fileName && <p className='file-name'>Selected File: {fileName}</p>}
-            
+
             {/* Send button */}
             <button type='submit' className='send-button'>
               Send

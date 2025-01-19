@@ -95,3 +95,31 @@
           ))}
         </ul>
       </div> */}
+
+
+
+
+
+
+
+
+            // setMessage
+      // setMessage(error);
+      // console.error(error);
+
+      // Check for error response from the API
+      // if (error.response && error.response.data) {
+      //   setMessage(
+      //     error.response.data.message ||
+      //       'Registration failed! Please try again.',
+      //   );
+      // } else {
+      //   setMessage('An unexpected error occurred. Please try again later.'); // General error message
+      // }
+
+
+
+        // } else {
+        //   setMessage(
+        //     'Registration successful! Please check your email to confirm.',
+        //   ); // Success message

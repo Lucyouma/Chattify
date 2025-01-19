@@ -4,10 +4,10 @@ const User = require('../models/User'); // Import the User model to interact wit
  * Controller to fetch all users except the logged-in user.
  * Only `_id` and `email` are included in the response to minimize data exposure.
  * This endpoint is protected and can only be accessed by authenticated users.
- * 
+ *
  * @route GET /users
  * @access Private (Authenticated users only)
- * 
+ *
  * @returns {array} - A list of users excluding the logged-in user, containing only the `_id` and `email`.
  * @throws {401} - If the user is not authenticated or the user ID is missing.
  * @throws {500} - If there is a server error while fetching users.

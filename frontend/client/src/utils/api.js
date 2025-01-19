@@ -19,7 +19,7 @@ apiClient.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error); // Handle any request errors
-  }
+  },
 );
 
 // Register user function

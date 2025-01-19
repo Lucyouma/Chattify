@@ -83,7 +83,6 @@ function Chat() {
   //use effect for saving and loading messages from local storage for persistence
   useEffect(() => {
     if (receiverId) {
-<<<<<<< HEAD
       const fetchMessages = async () => {
         try {
           // Retrieve senderId from localStorage
@@ -120,14 +119,6 @@ function Chat() {
     if (!receiverId) {
       alert('Please select a user to chat with.');
       return;
-=======
-      const storedMessages = localStorage.getItem(
-        `chat_${userId}_${receiverId}`,
-      );
-      if (storedMessages) {
-        setMessages(JSON.parse(storedMessages));
-      }
->>>>>>> submaster
     }
   }, [receiverId, userId]);
 
@@ -159,7 +150,6 @@ function Chat() {
   const handleSendMessage = (e) => {
     e.preventDefault();
 
-<<<<<<< HEAD
     try {
       const response = await axios.post('/api/chat/send', formData, {
         headers: {
@@ -167,9 +157,6 @@ function Chat() {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
-=======
-    if (!message && !file) return;
->>>>>>> submaster
 
     const newMessage = {
       senderId: userId,

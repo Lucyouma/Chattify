@@ -83,43 +83,9 @@ function Chat() {
   //use effect for saving and loading messages from local storage for persistence
   useEffect(() => {
     if (receiverId) {
-      const fetchMessages = async () => {
-        try {
-          // Retrieve senderId from localStorage
-          const senderId = localStorage.getItem('senderId'); // Fetch the senderId directly from localStorage
-          if (!senderId) {
-            console.error('Sender ID not found');
-            alert('You are not logged in! Please log in again.');
-            return;
-          }
 
-          // Make the request to fetch messages
-          const response = await axios.get(`/api/chat/send/${senderId}/${receiverId}`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-          });
-
-          setMessages(response.data); // Update chat messages
-        } catch (error) {
-          console.error('Error fetching messages:', error);
-        }
-      };
-
-      fetchMessages();
     }
-  }, [receiverId]); // Now userId is no longer a dependency here since senderId is taken from localStorage
 
-  /**
-   * Handle sending a new message with optional file attachment.
-   * @param {Event} e - Form submission event
-   */
-  const handleSendMessage = async (e) => {
-    e.preventDefault();
-
-    // Validate that a recipient is selected
-    if (!receiverId) {
-      alert('Please select a user to chat with.');
-      return;
-    }
   }, [receiverId, userId]);
 
   //save chat history locally whenever messages change
@@ -150,13 +116,7 @@ function Chat() {
   const handleSendMessage = (e) => {
     e.preventDefault();
 
-    try {
-      const response = await axios.post('/api/chat/send', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
+    if (!message && !file) return;
 
     const newMessage = {
       senderId: userId,

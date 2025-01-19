@@ -54,19 +54,36 @@ function Chat() {
       // Extract user ID from token payload
       const userData = JSON.parse(atob(token.split('.')[1])); // Decode JWT payload
       setUserId(userData.id);
+
+      //delete this line
       localStorage.setItem('senderId', userData.id);
 
       // Connect socket and listen for messages
-      if (!socketRef.current) {
-        socketRef.current = connectSocket(userData.id); // Pass user ID for initialization
+      // if (!socketRef.current) {
+      // socketRef.current = connectSocket(userData.id); // Pass user ID for initialization
+      try {
+        socketRef.current = connectSocket();
+        if (!socketRef.current) {
+          console.error('Failed to connect to socket');
+          return;
+        }
+        socketRef.current.emit('userConnected', userData.id); //notify server of connected user
+        //join room and listen for messages
         listenForMessages((newMessage) => {
           setMessages((prevMessages) => [...prevMessages, newMessage]);
         });
-
-        listenForChatHistory((history) => {
-          setMessages(history);
+        socketRef.current.on('newMessage', (message) => {
+          setMessages((prevMessages) => [...prevMessages, message]);
         });
+      } catch (error) {
+        console.errot('Error initializing socket:', error);
       }
+
+      //delete this next
+      // listenForChatHistory((history) => {
+      //   setMessages(history);
+      // });
+      // }
     };
 
     authenticateUser();
@@ -130,38 +147,62 @@ function Chat() {
       timestamp: new Date().toISOString(),
     };
 
-    sendMessage(newMessage); // Send the message via socket
-    setMessages((prevMessages) => {
-      const updatedMessages = [...prevMessages, newMessage];
-      localStorage.setItem(
-        `chat_${userId}_${receiverId}`,
-        JSON.stringify(updatedMessages),
-      );
-      return updatedMessages;
-    });
-    // Clear inputs
-    setMessage('');
-    setFile(null);
-    setFileName('');
-  };
-
-  // Handle file selection
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    if (selectedFile) {
-      setFile(selectedFile);
-      setFileName(selectedFile.name);
+    //new changes
+    try {
+      if (file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        const { data } = axios.post('/api/upload', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+        newMessage.file = data.url;
+      }
+      sendMessage(newMessage);
+      setMessages((prevMessages) => [...prevMessages, newMessage]);
+      setMessage('');
+      setFile(null);
+      setFileName('');
+    } catch (error) {
+      console.error('Error sending message:', error);
     }
   };
+
+  //   sendMessage(newMessage); // Send the message via socket
+  //   setMessages((prevMessages) => {
+  //     const updatedMessages = [...prevMessages, newMessage];
+  //     localStorage.setItem(
+  //       `chat_${userId}_${receiverId}`,
+  //       JSON.stringify(updatedMessages),
+  //     );
+  //     return updatedMessages;
+  //   });
+  //   // Clear inputs
+  //   setMessage('');
+  //   setFile(null);
+  //   setFileName('');
+  // };
+
+  // Handle file selection
+  // const handleFileChange = (e) => {
+  //   const selectedFile = e.target.files[0];
+  //   if (selectedFile) {
+  //     setFile(selectedFile);
+  //     setFileName(selectedFile.name);
+  //   }
+  // };
 
   // Handle selecting a user for chatting, including self-messaging
   const handleUserClick = (id) => {
-    if (id === receiverId) {
-      console.log('User already selected');
-      return;
-    }
+    // if (id === receiverId) {
+    //   console.log('User already selected');
+    //   return;
+    // }
     setReceiverId(id);
     setMessages([]); //clear messages for new receiver
+    socketRef.current.emit('joinChat', id);
   };
   // const handleUserClick = (id) => {
   //   setReceiverId(id);
@@ -176,6 +217,14 @@ function Chat() {
   //     // setMessages([]); // Clear previous messages
   //   }
   // };
+
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+      setFileName(selectedFile.name);
+    }
+  };
 
   // Filter users based on search term
   const filteredUsers = users.filter(

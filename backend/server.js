@@ -36,7 +36,7 @@ app.use(
     origin: 'http://localhost:3000', // Frontend URL (ensure it's correct)
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true, // Allows cookies if required
-  })
+  }),
 );
 
 // Connect to MongoDB
@@ -65,10 +65,16 @@ const upload = multer({
   storage,
   limits: { fileSize: 10 * 1024 * 1024 }, // Limit file size to 10MB
   fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) {
+    if (
+      file.mimetype.startsWith('image/') ||
+      file.mimetype.startsWith('video/')
+    ) {
       cb(null, true); // Accept image and video files
     } else {
-      cb(new Error('Only image, video, and document files are allowed!'), false);    
+      cb(
+        new Error('Only image, video, and document files are allowed!'),
+        false,
+      );
     }
   },
 });
@@ -119,13 +125,18 @@ app.post('/api/chat', authenticate, async (req, res) => {
 
     // If no chat exists, create a new one
     if (!chat) {
-      chat = await Chat.create({ users: [currentUserId, recipientId], messages: [] });
+      chat = await Chat.create({
+        users: [currentUserId, recipientId],
+        messages: [],
+      });
     }
 
     res.json(chat); // Return the chat object
   } catch (err) {
     console.error('Error creating or retrieving chat:', err);
-    res.status(500).json({ error: 'An error occurred while creating/retrieving the chat' });
+    res
+      .status(500)
+      .json({ error: 'An error occurred while creating/retrieving the chat' });
   }
 });
 
@@ -139,7 +150,9 @@ app.get('/api/chat/:chatId/messages', authenticate, async (req, res) => {
     res.json(messages); // Return the messages
   } catch (err) {
     console.error('Error fetching messages:', err);
-    res.status(500).json({ error: 'An error occurred while fetching messages' });
+    res
+      .status(500)
+      .json({ error: 'An error occurred while fetching messages' });
   }
 });
 
@@ -158,13 +171,17 @@ app.post('/api/chat/:chatId/send', authenticate, async (req, res) => {
     // Fetch the sender from the database
     const sender = await User.findById(senderId);
     if (!sender) {
-      return res.status(400).json({ error: 'Sender not found in the database.' });
+      return res
+        .status(400)
+        .json({ error: 'Sender not found in the database.' });
     }
 
     // Fetch the recipient from the database
     const recipient = await User.findById(recipientId);
     if (!recipient) {
-      return res.status(400).json({ error: 'Recipient not found in the database.' });
+      return res
+        .status(400)
+        .json({ error: 'Recipient not found in the database.' });
     }
 
     // Create and save the new message
@@ -186,7 +203,9 @@ app.post('/api/chat/:chatId/send', authenticate, async (req, res) => {
     res.status(201).json(message);
   } catch (err) {
     console.error('Error sending message:', err);
-    res.status(500).json({ error: 'An error occurred while sending the message' });
+    res
+      .status(500)
+      .json({ error: 'An error occurred while sending the message' });
   }
 });
 
@@ -194,7 +213,7 @@ app.post('/api/chat/:chatId/send', authenticate, async (req, res) => {
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: 'http://localhost:3000', // Ensure this is the correct frontend URL
+    origin: 'http://localhost:3000', // the frontend URL
     methods: ['GET', 'POST'],
   },
 });
@@ -209,6 +228,12 @@ app.use((req, res, next) => {
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
 
+  //register user when they join
+  socket.on('registerUser', (userId) => {
+    activeUsers.set(userId, socket.id);
+    console.log(`user registered: ${userId} -> ${socket.id}`);
+  });
+
   // Join a chat room
   socket.on('joinChat', (chatId) => {
     socket.join(chatId);
@@ -220,9 +245,53 @@ io.on('connection', (socket) => {
     const { chatId, message } = data;
     io.to(chatId).emit('receiveMessage', message);
   });
+  socket.on('sendMessage', async ({ chatId, content, recepitntId }) => {
+    const senderId = [...activeUsers.entries()].find(
+      ([id, sid]) => sid === socket.id,
+    )?.[0];
+    if (!senderId) {
+      console.error('Sender not found for socket:', socket.id);
+      return;
+    }
+
+    try {
+      const message = await Message.create({
+        chatId,
+        sender: senderId,
+        receiver: recepientId,
+        content,
+        createdAt: new Date(),
+      });
+      //update chat with new message
+      await Chat.findByIdAndUpdate(chatId, {
+        $push: { messages: message._id },
+      });
+      // emit message to recepient if online
+      const recepientSocketId = activeUsers.get(recepientId);
+      if (recepientSocketId) {
+        io.to(recepientSocketId).emit('receiveMessage', message);
+        console.log(`Message sent to ${recepientId}:`, message);
+      } else {
+        console.log(`Recepient ${recepientId} is not online.`);
+      }
+      //Notify sender of sent message
+      socket.emit('messageSent', message);
+    } catch (err) {
+      console.error('Error saving message to database:', err);
+      socket.emit('error', 'Error sending message');
+    }
+  });
 
   socket.on('disconnect', () => {
-    console.log('A user disconnected:', socket.id);
+    const userId = [...activeUsers.entries()].find(
+      ([id, sid]) => sid === socket.id,
+    )?.[0];
+    if (userId) {
+      activeUsers.delete(userId);
+      console.log(`A user disconnected, ${userId}`);
+    } else {
+      console.log('Unknown user disconnected:', socket.id);
+    }
   });
 });
 

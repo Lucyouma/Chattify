@@ -29,10 +29,12 @@ const connectSocket = () => {
 };
 
 // Function to send a message to the server
-const sendMessage = (message) => {
+const sendMessage = (message, recepientId) => {
   if (socket.connected) {
-    socket.emit('sendMessage', message); // Emit the message event to the server
-    console.log('Message sent:', message);
+    const payload = { message, recepientId};
+
+    socket.emit('sendMessage', payload); // Emit the message event to the server
+    console.log('Message sent to recepient:', recepientId, message);
   } else {
     console.error('Cannot send message; socket is not connected!');
   }
@@ -43,9 +45,9 @@ const listenForMessages = (callback) => {
   // Ensure the listener is added only once
   if (socket.hasListeners('receiveMessage')) return;
 
-  socket.on('receiveMessage', (message) => {
-    callback(message); // Execute the callback when a message is received
-    console.log('New message received:', message);
+  socket.on('receiveMessage', (data) => {
+    callback(data); // Execute the callback when a message is received
+    console.log('New message received:', data);
   });
 };
 

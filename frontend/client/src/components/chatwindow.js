@@ -34,9 +34,9 @@ const ChatWindow = ({
   //   || {
   //     name: 'Yourself',
   //   };
+  console.log('Messages:', messages);
+
   console.log('Receiver is id ', receiverId);
-  console.log('the users include', users);
-  console.log('and the selected user is ', selectedUser);
 
   return (
     <div className='flex-1 flex flex-col bg-gray-50'>
@@ -53,7 +53,12 @@ const ChatWindow = ({
                 key={msg._id || `${msg.senderId}-${msg.timestamp}-${index}`}
                 className={msg.senderId === userId ? 'sent' : 'received'}
               >
-                <p>{msg.content}</p>
+                {/* <p>{msg.content}</p> */}
+                {msg.content ? (
+                  <p className='message-content'>{msg.content}</p>
+                ) : (
+                  <p className='message-placeholder'>No content available</p>
+                )}
                 {/* Display media attachments if present */}
                 {msg.multimedia && (
                   <div className='chat-media'>

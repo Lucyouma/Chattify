@@ -54,19 +54,64 @@ function Chat() {
       // Extract user ID from token payload
       const userData = JSON.parse(atob(token.split('.')[1])); // Decode JWT payload
       setUserId(userData.id);
+
+      //delete this line
       localStorage.setItem('senderId', userData.id);
 
-      // Connect socket and listen for messages
-      if (!socketRef.current) {
-        socketRef.current = connectSocket(userData.id); // Pass user ID for initialization
+      try {
+        console.log('before connect socket ref is ', socketRef.current);
+        const socket = connectSocket();
+        console.log('connectsocket returned:', socket);
+        console.log('socket connected status:', socket?.connected);
+
+        if (!socket) {
+          throw new Error(
+            'Socket connection failed - connectSocket returned null/undefined',
+          );
+        }
+        socketRef.current = socket;
+
+        if (!socketRef.current.connected) {
+          console.log(
+            'Socket not yet connected, waiting for connection event...',
+          );
+        }
+
+        // if (!socketRef.current) {
+        //   console.error('Failed to connect to socket1');
+        //   return;
+        // }
+
+        //join room and listen for messages
         listenForMessages((newMessage) => {
           setMessages((prevMessages) => [...prevMessages, newMessage]);
         });
 
-        listenForChatHistory((history) => {
-          setMessages(history);
+        socketRef.current.on('connect', () => {
+          console.log('Socket connected succesfully:', socketRef.current.id);
+          socketRef.current.emit('userConnected', userData.id);
+          socketRef.current.emit('registerUser', userId);
+          console.log('User registered with ID:', userId);
         });
+        console.log('After connect socker ref is', socketRef.current);
+      } catch (error) {
+        console.error('Error initializing socket:', error);
+        console.error('Socket state:', {
+          socketRef: socketRef.current,
+          connected: socketRef.current?.connected,
+          id: socketRef.current?.id,
+        });
+
+        // console.log(
+        //   'Failed to connect to chat server.Please try refreshing page.',
+        // );
       }
+
+      //delete this next
+      // listenForChatHistory((history) => {
+      //   setMessages(history);
+      // });
+      // }
     };
 
     authenticateUser();
@@ -74,11 +119,54 @@ function Chat() {
     // Cleanup the socket connection on unmount
     return () => {
       if (socketRef.current) {
+        console.log('Cleaning up socket connection...');
+        socketRef.current.off('connect');
+        socketRef.current.off('disconnect');
+        socketRef.current.off('connect_error');
         disconnectSocket();
         socketRef.current = null;
       }
     };
   }, [navigate]);
+
+  useEffect(() => {
+    // Monitor socket connection status
+    const checkSocketConnection = () => {
+      if (socketRef.current) {
+        console.log('Socket connection status:', {
+          connected: socketRef.current.connected,
+          id: socketRef.current.id,
+        });
+      } else {
+        console.log('No socket reference available');
+      }
+    };
+
+    const interval = setInterval(checkSocketConnection, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (socketRef.current) {
+      socketRef.current.on('disconnect', async () => {
+        console.log('Socket disconnected, attempting to reconnect...');
+        try {
+          const socket = connectSocket();
+          if (socket) {
+            socketRef.current = socket;
+            if (userId) {
+              socket.emit('userConnected', userId);
+            }
+            if (receiverId) {
+              socket.emit('joinChat', receiverId);
+            }
+          }
+        } catch (error) {
+          console.error('Reconnection failed:', error);
+        }
+      });
+    }
+  }, [socketRef.current, userId, receiverId]);
 
   //use effect for saving and loading messages from local storage for persistence
   useEffect(() => {
@@ -130,22 +218,71 @@ function Chat() {
       timestamp: new Date().toISOString(),
     };
 
-    sendMessage(newMessage); // Send the message via socket
-    setMessages((prevMessages) => {
-      const updatedMessages = [...prevMessages, newMessage];
-      localStorage.setItem(
-        `chat_${userId}_${receiverId}`,
-        JSON.stringify(updatedMessages),
-      );
-      return updatedMessages;
-    });
-    // Clear inputs
-    setMessage('');
-    setFile(null);
-    setFileName('');
+    //new changes
+    try {
+      if (file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        const { data } = axios.post('/api/upload', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+        newMessage.file = data.url;
+      }
+      sendMessage(newMessage, receiverId, userId);
+      setMessages((prevMessages) => [...prevMessages, newMessage]);
+      setMessage('');
+      setFile(null);
+      setFileName('');
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
   };
 
-  // Handle file selection
+  // Handle selecting a user for chatting, including self-messaging
+  const handleUserClick = (id) => {
+    if (!socketRef.current?.connected) {
+      console.log('Socket not connected, attempting to reconnect...');
+      // return;
+      try {
+        const socket = connectSocket();
+        if (!socket) {
+          throw new Error('Failed to create socket connection');
+        }
+        socketRef.current = socket;
+
+        socketRef.current.on('connect', () => {
+          console.log('Socket reconnected succesfully');
+          setReceiverId(id);
+          setMessages([]);
+          socketRef.current.emit('joinChat', id);
+        });
+      } catch (error) {
+        console.error('Error reconnecting socket:', error);
+        return;
+      }
+    } else {
+      // socket lready connected, proceed normally
+      setReceiverId(id);
+      setMessages([]); //clear messages for new receiver
+      socketRef.current.emit('joinChat', id);
+    }
+  };
+
+  useEffect(() => {
+    if (socketRef.current) {
+      socketRef.current.on('disconnect', () => {
+        console.log('Socket disconnected');
+      });
+
+      socketRef.current.on('connect_error', (error) => {
+        console.error('Socket connection error:', error);
+      });
+    }
+  }, [socketRef.current]);
+
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
@@ -153,29 +290,6 @@ function Chat() {
       setFileName(selectedFile.name);
     }
   };
-
-  // Handle selecting a user for chatting, including self-messaging
-  const handleUserClick = (id) => {
-    if (id === receiverId) {
-      console.log('User already selected');
-      return;
-    }
-    setReceiverId(id);
-    setMessages([]); //clear messages for new receiver
-  };
-  // const handleUserClick = (id) => {
-  //   setReceiverId(id);
-  //   console.log('user clicked with id ', receiverId);
-  //   if (id === userId) {
-  //     // Allow messaging to self, same as messaging another user
-  //     setReceiverId(id);
-  //     // setMessages([]); // Clear previous messages
-  //   } else {
-  //     // Proceed with normal user selection
-  //     setReceiverId(id);
-  //     // setMessages([]); // Clear previous messages
-  //   }
-  // };
 
   // Filter users based on search term
   const filteredUsers = users.filter(

@@ -8,32 +8,47 @@ const socket = io('http://localhost:5000', {
   reconnectionAttempts: 5, // Number of reconnection attempts
   reconnectionDelay: 1000, // Delay between reconnection attempts
   reconnectionDelayMax: 5000, // Maximum delay for reconnection
+  timeout: 20000,
+  forceNew: true,
 });
 
 // Function to connect the socket manually
 const connectSocket = () => {
   if (!socket.connected) {
     socket.connect(); // Connect to the server
-    console.log('Socket connecting...');
+    console.log('Socket connecting...', socket);
   }
 
   // Handle successful connection
   socket.on('connect', () => {
-    console.log('Socket connected with ID:', socket.id);
+    console.log('The Socket connected with ID:', socket.id);
+  });
+
+  socket.on('error', (error) => {
+    console.error('Socket error:', error);
+  });
+  socket.on('disconnect', (reason) => {
+    console.log('Socket disconnected:', reason);
   });
 
   // Handle connection errors
   socket.on('connect_error', (err) => {
     console.error('Socket connection failed:', err.message);
   });
+  return socket; //return socket instance
 };
 
 // Function to send a message to the server
-const sendMessage = (message, recepientId) => {
+const sendMessage = (message, recepientId, senderId) => {
   if (socket.connected) {
-    const payload = { message, recepientId};
+    const payload = { message, recepientId };
+    console.log('the message:', message);
+
+    socket.emit('registerUser', senderId);
+    console.log('The sender has sender id:', senderId);
 
     socket.emit('sendMessage', payload); // Emit the message event to the server
+    console.log('The recepient has recepient id:', recepientId);
     console.log('Message sent to recepient:', recepientId, message);
   } else {
     console.error('Cannot send message; socket is not connected!');
@@ -48,6 +63,7 @@ const listenForMessages = (callback) => {
   socket.on('receiveMessage', (data) => {
     callback(data); // Execute the callback when a message is received
     console.log('New message received:', data);
+    console.log('content is ', data);
   });
 };
 

@@ -230,7 +230,7 @@ io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
 
   //register user when they join
-  socket.on('registerUser', (userId) => {
+  socket.on('registerUser', (userId) => { 
     activeUsers.set(userId, socket.id);
     console.log(`user registered: ${userId} -> ${socket.id}`);
   });

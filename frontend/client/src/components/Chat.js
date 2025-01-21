@@ -84,6 +84,7 @@ function Chat() {
 
         //join room and listen for messages
         listenForMessages((newMessage) => {
+          // alert(`hello the new listened message is ${newMessage});
           setMessages((prevMessages) => [...prevMessages, newMessage]);
         });
 
@@ -93,7 +94,6 @@ function Chat() {
           socketRef.current.emit('registerUser', userId);
           console.log('User registered with ID:', userId);
         });
-        console.log('After connect socker ref is', socketRef.current);
       } catch (error) {
         console.error('Error initializing socket:', error);
         console.error('Socket state:', {
@@ -231,6 +231,12 @@ function Chat() {
         });
         newMessage.file = data.url;
       }
+      // console.log(
+      //   'The new Message is and its type is ',
+      //   newMessage,
+      //   typeof newMessage,
+      // );
+
       sendMessage(newMessage, receiverId, userId);
       setMessages((prevMessages) => [...prevMessages, newMessage]);
       setMessage('');

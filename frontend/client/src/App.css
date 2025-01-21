@@ -19,17 +19,9 @@
   padding: 10px;
   overflow-y: auto; /* Scroll if the user list is too long */
 }
+/*new code */
 
-/* Center panel for chat messages */
-.chat-main {
-  flex: 1; /* Take up remaining space */
-  display: flex;
-  flex-direction: column;
-  background-color: #fff;
-  overflow-y: auto; /* Allow chat messages to scroll if needed */
-  padding: 10px;
-}
-
+/*cut here*/
 /* Bottom panel for chat input */
 .chat-input {
   background-color: #f4f4f4;
@@ -75,24 +67,26 @@
   /* margin: 0; */
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 10px;
+  padding-inline: 10px;
+  border-radius: 20px;
 }
 
 /* Sent and received messages styling */
 .sent {
   text-align: right;
   background-color: #dcf8c6;
-  padding: 10px;
+  padding: 5px;
   border-radius: 8px;
-  max-width: 60%;
+  max-width: 40%;
   margin-left: auto;
 }
 
 .received {
   text-align: left;
   background-color: #ececec;
-  padding: 10px;
+  padding: 5px;
   border-radius: 8px;
-  max-width: 60%;
+  max-width: 40%;
   text-emphasis-color: blue;
 }

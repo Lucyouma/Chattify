@@ -40,18 +40,25 @@ const connectSocket = () => {
 
 // Function to send a message to the server
 const sendMessage = (message, recepientId, senderId) => {
-  if (socket.connected) {
-    const payload = { message, recepientId };
-    console.log('the message:', message);
+  if (!socket.connected) {
+    console.error('Cannot send message, socket is not connected!');
+    return;
+  }
+  try {
+    //prepare payload
+    const payload = {
+      senderId,
+      recepientId,
+      content: message.content || '',
+      file: message.file || null,
+      timestamp: message.timestamp || new Date().toISOString(),
+    };
+    console.log('Sending payload', payload);
 
-    socket.emit('registerUser', senderId);
-    console.log('The sender has sender id:', senderId);
-
-    socket.emit('sendMessage', payload); // Emit the message event to the server
-    console.log('The recepient has recepient id:', recepientId);
-    console.log('Message sent to recepient:', recepientId, message);
-  } else {
-    console.error('Cannot send message; socket is not connected!');
+    socket.emit('sendMessage', payload);
+    // console.log('Message sent:', payload);
+  } catch (error) {
+    console.error('Error sending message');
   }
 };
 
@@ -62,8 +69,9 @@ const listenForMessages = (callback) => {
 
   socket.on('receiveMessage', (data) => {
     callback(data); // Execute the callback when a message is received
-    console.log('New message received:', data);
-    console.log('content is ', data);
+    // console.log('New message received:', data);
+    // console.log('content is ', data);
+    // console.log('Server emitted "receiveMessage":', data);
   });
 };
 

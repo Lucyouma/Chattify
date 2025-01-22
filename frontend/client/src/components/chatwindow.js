@@ -34,9 +34,9 @@ const ChatWindow = ({
   //   || {
   //     name: 'Yourself',
   //   };
+  console.log('Messages:', messages);
+
   console.log('Receiver is id ', receiverId);
-  console.log('the users include', users);
-  console.log('and the selected user is ', selectedUser);
 
   return (
     <div className='flex-1 flex flex-col bg-gray-50'>

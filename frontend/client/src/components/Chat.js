@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UserSelectionContainer from './userselection';
 import ChatWindow from './chatwindow';
+import Navbar from './Navbar';
 import axios from '../utils/axios';
 import {
   connectSocket,
@@ -54,11 +55,15 @@ function Chat() {
       // Extract user ID from token payload
       const userData = JSON.parse(atob(token.split('.')[1])); // Decode JWT payload
       setUserId(userData.id);
+      // socketRef.current.emit('registerUser', userId);
       localStorage.setItem('senderId', userData.id);
 
       // Connect socket and listen for messages
       if (!socketRef.current) {
         socketRef.current = connectSocket(userData.id); // Pass user ID for initialization
+        console.log('Registering user with user id', userId);
+        socketRef.current.emit('registerUser', userId);
+
         listenForMessages((newMessage) => {
           setMessages((prevMessages) => [...prevMessages, newMessage]);
         });
@@ -80,7 +85,7 @@ function Chat() {
     };
   }, [navigate]);
 
-  //use effect for saving and loading messages from local storage for persistence
+  // use effect for saving and loading messages from local storage for persistence
   useEffect(() => {
     if (receiverId) {
 
@@ -157,6 +162,10 @@ function Chat() {
       return;
     }
     setReceiverId(id);
+    if (socketRef.current) {
+      socketRef.current.emit('registerUser', receiverId);
+    }
+
     setMessages([]); //clear messages for new receiver
   };
   // const handleUserClick = (id) => {

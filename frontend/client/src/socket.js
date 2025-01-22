@@ -8,35 +8,58 @@ const socket = io('http://localhost:5000', {
   reconnectionAttempts: 5, // Number of reconnection attempts
   reconnectionDelay: 1000, // Delay between reconnection attempts
   reconnectionDelayMax: 5000, // Maximum delay for reconnection
+  timeout: 20000,
+  forceNew: true,
 });
 
 // Function to connect the socket manually
 const connectSocket = () => {
   if (!socket.connected) {
     socket.connect(); // Connect to the server
-    console.log('Socket connecting...');
+    console.log('Socket connecting...', socket);
   }
 
   // Handle successful connection
   socket.on('connect', () => {
-    console.log('Socket connected with ID:', socket.id);
+    console.log('The Socket connected with ID:', socket.id);
+  });
+
+  socket.on('error', (error) => {
+    console.error('Socket error:', error);
+  });
+  socket.on('disconnect', (reason) => {
+    console.log('Socket disconnected:', reason);
   });
 
   // Handle connection errors
   socket.on('connect_error', (err) => {
     console.error('Socket connection failed:', err.message);
   });
+  return socket; //return socket instance
 };
 
 // Function to send a message to the server
-const sendMessage = (message, recepientId) => {
-  if (socket.connected) {
-    const payload = { message, recepientId};
+const sendMessage = (message, recepientId, senderId) => {
+  if (!socket.connected) {
+    console.error('Cannot send message, socket is not connected!');
+    return;
+  }
+  try {
+    //prepare payload
+    const payload = {
+      senderId: message.senderId,
+      recepientId: message.receiverId,
+      content: message.content || '',
+      file: message.file || null,
+      timestamp: message.timestamp || new Date().toISOString(),
+    };
+    console.log('The message is', message);
+    console.log('Sending payload', payload);
 
-    socket.emit('sendMessage', payload); // Emit the message event to the server
-    console.log('Message sent to recepient:', recepientId, message);
-  } else {
-    console.error('Cannot send message; socket is not connected!');
+    socket.emit('sendMessage', payload);
+    // console.log('Message sent:', payload);
+  } catch (error) {
+    console.error('Error sending message');
   }
 };
 
@@ -47,7 +70,9 @@ const listenForMessages = (callback) => {
 
   socket.on('receiveMessage', (data) => {
     callback(data); // Execute the callback when a message is received
-    console.log('New message received:', data);
+    // console.log('New message received:', data);
+    // console.log('content is ', data);
+    // console.log('Server emitted "receiveMessage":', data);
   });
 };
 

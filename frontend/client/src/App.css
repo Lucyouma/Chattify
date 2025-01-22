@@ -28,6 +28,10 @@
   padding: 16px;
   overflow-y: auto; /* Scroll if the user list is too long */
 }
+/*new code */
+
+
+/*cut here*/
 
 /* Center panel for chat messages */
 .chat-main {
@@ -40,6 +44,7 @@
   padding: 10px;
   overflow: auto;
 }
+
 
 /* Bottom panel for chat input */
 .chat-input {
@@ -94,27 +99,31 @@
   margin: 0;
   display: inline-block;
   flex-direction: column;
-  gap: 6px;
-  padding: 8px 10px;
-  max-width: 60%;
+
+  gap: 10px;
+  padding-inline: 10px;
+  border-radius: 20px;
+
+
 }
 
 /* Sent and received messages styling */
 .sent {
   text-align: right;
   background-color: #dcf8c6;
-  padding: 10px;
+  padding: 5px;
   border-radius: 8px;
-  max-width: 60%;
+  max-width: 40%;
   margin-left: auto;
 }
 
 .received {
   text-align: left;
   background-color: #ececec;
-  padding: 10px;
+  padding: 5px;
   border-radius: 8px;
-  max-width: 60%;
+  max-width: 40%;
+  text-emphasis-color: blue;
 }
 
 * Landing Page Styling */

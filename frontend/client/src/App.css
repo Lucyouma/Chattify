@@ -35,6 +35,7 @@
   flex-direction: column;
   height: 100vh; /* Full viewport height */
   background-color: #f5f5f5;
+  /* background-color: black; */
 }
 
 /* Body section containing the left user list and center chat messages */
@@ -58,6 +59,7 @@
 /* Bottom panel for chat input */
 .chat-input {
   background-color: #f4f4f4;
+
   padding: 10px;
   display: flex;
   justify-content: space-between;
@@ -65,6 +67,14 @@
   border-top: 1px solid #ddd;
 }
 
+.message-input input {
+  flex-grow: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  margin-right: 10px;
+  background-color: black;
+}
 /* Message input box styling */
 .message-input {
   width: 80%; /* Takes up most of the width */
@@ -74,13 +84,7 @@
   border: 1px solid #ccc;
   border-top: 1px solid #ccc;
   background-color: #fff;
-}
-.message-input input {
-  flex-grow: 1;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 20px;
-  margin-right: 10px;
+  /* background-color: black; */
 }
 
 /* Send button styling */
@@ -105,17 +109,26 @@
 .chat-messages {
   flex: 1;
   overflow-y: scroll;
-  padding: 10px 15px;
+  padding: 20px 30px;
   background-color: #fff;
-  gap: 10px;
+
+  gap: 20px;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  min-height: 40vw;
 }
 
 .chat-messages p {
   /* margin: 0; */
   display: flex;
   flex-direction: column;
-  column-gap: 40px;
-  /* gap: 10px; */
+  justify-content: space-around;
+  /* justify-content: space-between; */
+  column-gap: 50px;
+  /* margin: 30px; */
+  padding: 15px;
+
+  border-bottom: 30px;
   padding-inline: 10px;
   border-radius: 20px;
 }
@@ -124,19 +137,25 @@
 .sent {
   text-align: right;
   background-color: #dcf8c6;
-  padding: 5px;
-  border-radius: 8px;
+  min-height: 2vw;
+
+  padding: 15px;
+
+  border-radius: 100px;
   max-width: 60%;
   overflow-wrap: anywhere;
   margin-left: auto;
   border-bottom-right-radius: 0;
+  border-bottom: 40px;
 }
 
 .received {
   text-align: left;
   background-color: #ececec;
-  padding: 5px;
-  border-radius: 8px;
+  padding: 15px;
+  min-height: 2vw;
+
+  border-radius: 100px;
   max-width: 60%;
   overflow-wrap: anywhere;
 

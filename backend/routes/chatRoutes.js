@@ -11,25 +11,30 @@ const authenticateUser = require('../middleware/authMiddleware'); // Authenticat
  */
 router.post('/send', authenticateUser, async (req, res) => {
   try {
-    const { senderId, receiverId, message } = req.body;
+    const { senderId, receiverId, message, threadId, multimedia } = req.body;
 
     // Validate that required fields are present
     if (!senderId || !receiverId || !message) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    // Create and save the chat message in the database
-    const chatMessage = await Chat.create({
+    const messageData = {
       sender: senderId,
       receiver: receiverId,
       message,
-    });
+      thread: threadId,
+      multimedia,  // Optional field for multimedia
+    };
 
-    // Return the created message as the response
-    res.status(201).json(chatMessage);
-  } catch (err) {
-    console.error('Error sending message:', err); // Log the error for debugging
-    res.status(500).json({ error: err.message }); // Return server error with error message
+    // Use the createMessage method to create a new chat message
+    const newMessage = await Chat.createMessage(messageData);
+
+    // Send back the created message
+    res.status(201).json(newMessage);
+  } catch (error) {
+    console.error('Error sending message:', error);
+    // Return a proper error response
+    res.status(500).json({ error: error.message || 'Internal Server Error' });
   }
 });
 
@@ -41,7 +46,7 @@ router.post('/send', authenticateUser, async (req, res) => {
  */
 router.post('/send-with-file', authenticateUser, upload.single('file'), async (req, res) => {
   try {
-    const { senderId, receiverId, message } = req.body;
+    const { senderId, receiverId, message, threadId } = req.body;
 
     // Validate that required fields are present
     if (!senderId || !receiverId || !message) {
@@ -52,18 +57,21 @@ router.post('/send-with-file', authenticateUser, upload.single('file'), async (r
     const filePath = req.file ? req.file.path : null;
 
     // Create and save the multimedia chat message with the file path (multimedia URL) if available
-    const chatMessage = await Chat.create({
+    const messageData = {
       sender: senderId,
       receiver: receiverId,
       message,
-      multimedia: filePath, // Store file URL in the multimedia field (this could be a Cloudinary URL)
-    });
+      thread: threadId,
+      multimedia: filePath,  // Store file URL in the multimedia field (this could be a Cloudinary URL)
+    };
+
+    const chatMessage = await Chat.createMessage(messageData);
 
     // Return the created message and file path in the response
     res.status(201).json({ chatMessage, filePath });
-  } catch (err) {
-    console.error('Error uploading file:', err); // Log the error for debugging
-    res.status(500).json({ error: err.message }); // Return server error with error message
+  } catch (error) {
+    console.error('Error uploading file:', error); // Log the error for debugging
+    res.status(500).json({ error: error.message || 'Internal Server Error' });
   }
 });
 
@@ -88,9 +96,9 @@ router.get('/:senderId/:receiverId', authenticateUser, async (req, res) => {
 
     // Return the messages as the response
     res.status(200).json(messages);
-  } catch (err) {
-    console.error('Error fetching messages:', err); // Log the error for debugging
-    res.status(500).json({ error: err.message }); // Return server error with error message
+  } catch (error) {
+    console.error('Error fetching messages:', error); // Log the error for debugging
+    res.status(500).json({ error: error.message || 'Internal Server Error' }); // Return server error with error message
   }
 });
 

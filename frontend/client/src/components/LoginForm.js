@@ -1,18 +1,21 @@
 import React, { useState } from 'react';
 import { loginUser } from '../utils/api'; // Import loginUser function from utils
-import { useNavigate } from 'react-router-dom'; // Assuming React Router is being used
+import { useNavigate } from 'react-router-dom'; // For navigation after login
 
-const LoginForm = () => {
+const LoginForm = ({ onLoginSuccess }) => {
   const [email, setEmail] = useState(''); // Email state
   const [password, setPassword] = useState(''); // Password state
   const [message, setMessage] = useState(''); // Message state (for displaying errors/success)
   const [loading, setLoading] = useState(false); // Loading state for form submission
   const navigate = useNavigate(); // To handle redirection after login
 
-  // handleLogin function to send login request
+  /**
+   * Handle the login form submission.
+   * @param {Event} e - The form submission event.
+   */
   const handleLogin = async (e) => {
     e.preventDefault(); // Prevent form submission from reloading the page
-    setMessage(''); // Clear previous messages
+    setMessage(''); // Clear any previous messages
     setLoading(true); // Show loading spinner or indicator
     console.log('Login attempt started'); // Debugging message to confirm login attempt
 
@@ -25,32 +28,31 @@ const LoginForm = () => {
 
       // If login is successful (i.e., we get a token)
       if (data && data.token) {
-        // Save the JWT to localStorage if login is successful
-        console.log('Saving token to localStorage:', data.token);
+        console.log('Saving token to localStorage:', data.token); // Debugging token saving
         localStorage.setItem('token', data.token); // Save token in localStorage
 
+        sessionStorage.setItem('isAuthenticated', 'true'); // Set authenticated state in sessionStorage
         setMessage('Login successful!'); // Set success message
+
+        // Notify parent component of login success
+        if (onLoginSuccess) onLoginSuccess();
 
         // Redirect to the chat page after successful login
         navigate('/chat');
       } else {
-        // If login fails (no token returned)
-        setMessage('Invalid credentials, please try again.');
+        setMessage('Invalid credentials, please try again.'); // Display error message
       }
     } catch (error) {
-      // Handle error if login fails
-      console.error('Login error:', error); // Log the error to the console
-
-      // Handling error messages
-      if (error.response) {
-        // Check if error response exists and show message
-        setMessage(error.response.data.message || 'Login failed! Please check your credentials.');
+      // Handle errors during login
+      console.error('Login error:', error); // Log the error for debugging
+      if (error.response && error.response.data.message) {
+        setMessage(error.response.data.message); // Display server-provided error message
       } else {
         setMessage('Login failed! Please check your credentials.'); // General error message
       }
     }
 
-    setLoading(false); // Set loading to false after the request is done
+    setLoading(false); // Stop the loading spinner/indicator
   };
 
   return (
@@ -77,9 +79,10 @@ const LoginForm = () => {
             className="input-field"
           />
         </div>
-        <button type="submit" className="submit-btn" disabled={loading}>Login</button>
+        <button type="submit" className="submit-btn" disabled={loading}>
+          {loading ? 'Logging in...' : 'Login'}
+        </button>
       </form>
-      {loading && <p>Loading...</p>} {/* Show loading message */}
       {message && <p className="message">{message}</p>} {/* Display message if there's a success/error */}
     </div>
   );

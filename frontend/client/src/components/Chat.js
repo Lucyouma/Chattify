@@ -88,13 +88,9 @@ function Chat() {
   // use effect for saving and loading messages from local storage for persistence
   useEffect(() => {
     if (receiverId) {
-      const storedMessages = localStorage.getItem(
-        `chat_${userId}_${receiverId}`,
-      );
-      if (storedMessages) {
-        setMessages(JSON.parse(storedMessages));
-      }
+
     }
+
   }, [receiverId, userId]);
 
   //save chat history locally whenever messages change

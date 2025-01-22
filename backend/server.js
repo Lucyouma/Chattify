@@ -226,8 +226,10 @@ app.use((req, res, next) => {
 
 //initialize activeUsers map
 const activeUsers = new Map();
+
 //initialize pendine messages map
 const pendingMessages = new Map();
+
 
 // Socket.io events
 io.on('connection', (socket) => {
@@ -239,6 +241,7 @@ io.on('connection', (socket) => {
       console.error('registeruser called without userid');
       return;
     }
+
     console.log('Setting the active users');
     activeUsers.set(userId, socket.id);
     console.log(`User registered: ${userId} -> ${socket.id}`);
@@ -254,6 +257,7 @@ io.on('connection', (socket) => {
       });
       pendingMessages.delete(userId);
     }
+
   });
 
   // Join a chat room
@@ -276,9 +280,11 @@ io.on('connection', (socket) => {
       ([id, sid]) => sid === socket.id,
     )?.[0];
     if (!senderId) {
+
       console.log('content of activeusers is', activeUsers.entries());
       console.error('Senderer not found for socket:', socket.id);
       socket.emit('error', 'Senderer not registered');
+
       return;
     }
 

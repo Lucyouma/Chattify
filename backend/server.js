@@ -15,7 +15,6 @@ const authenticate = require('./middleware/authMiddleware'); // JWT middleware
 const User = require('./models/User'); // Import User model
 const Chat = require('./models/Chat'); // Import Chat model
 const Message = require('./models/Message'); // Import Message model
-const activeUsers = new Map(); // Use Map to store userId -> socketId mappings
 
 // Load environment variables from .env
 dotenv.config();
@@ -34,7 +33,7 @@ app.use(express.json());
 // CORS configuration
 app.use(
   cors({
-    origin: 'http://localhost:3000', // Frontend URL
+    origin: 'http://localhost:3000', // Frontend URL (ensure it's correct)
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true, // Allows cookies if required
   }),
@@ -82,7 +81,7 @@ const upload = multer({
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/chat/send', chatRoutes);
+app.use('/api/chat', chatRoutes);
 app.use('/api/messages', messageRoutes); // Add message routes
 app.use('/api/protected', protectedRoutes); // Use JWT middleware for protected routes
 
@@ -194,11 +193,11 @@ app.post('/api/chat/:chatId/send', authenticate, async (req, res) => {
       createdAt: new Date(),
     });
 
-    // Push the message to the chat's message array
+    // Optionally push the message to the chat's message array (depends on your schema)
     await Chat.findByIdAndUpdate(chatId, { $push: { messages: message._id } });
 
     // Emit the message to other users in real-time using Socket.io
-    const chat = await Chat.findById(chatId).populate('users', 'email'); // Populate user details
+    const chat = await Chat.findById(chatId).populate('users', 'name email'); // Populate user details
     req.io.to(chatId).emit('newMessage', message);
 
     res.status(201).json(message);
@@ -225,33 +224,45 @@ app.use((req, res, next) => {
   next();
 });
 
+//initialize activeUsers map
+const activeUsers = new Map();
+
 // Socket.io events
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
 
   //register user when they join
-  socket.on('registerUser', (userId) => { 
+  socket.on('registerUser', (userId) => {
+    if (!userId) {
+      console.error('registeruser called without userid');
+      return;
+    }
     activeUsers.set(userId, socket.id);
-    console.log(`user registered: ${userId} -> ${socket.id}`);
+    console.log(`User registered: ${userId} -> ${socket.id}`);
   });
 
   // Join a chat room
   socket.on('joinChat', (chatId) => {
+    if (!chatId) {
+      console.error('Chat id required to join a chat');
+      return;
+    }
     socket.join(chatId);
-    console.log(`User joined chat room: ${chatId}`);
+    console.log(`Socket ${socket.id} joined chat room: ${chatId}`);
   });
 
   // Send message to a specific chat room
-  socket.on('sendMessage', (data) => {
-    const { chatId, message } = data;
-    io.to(chatId).emit('receiveMessage', message);
-  });
-  socket.on('sendMessage', async ({ chatId, content, recepitntId }) => {
+  // socket.on('sendMessage', (data) => {
+  //   const { chatId, message } = data;
+  //   io.to(chatId).emit('receiveMessage', message);
+  // });
+  socket.on('sendMessage', async ({ chatId, content, recepientId }) => {
     const senderId = [...activeUsers.entries()].find(
       ([id, sid]) => sid === socket.id,
     )?.[0];
     if (!senderId) {
       console.error('Sender not found for socket:', socket.id);
+      socket.emit('error', 'Sender not registered');
       return;
     }
 
@@ -263,6 +274,7 @@ io.on('connection', (socket) => {
         content,
         createdAt: new Date(),
       });
+      console.log('Message saved:', message);
       //update chat with new message
       await Chat.findByIdAndUpdate(chatId, {
         $push: { messages: message._id },
@@ -272,15 +284,20 @@ io.on('connection', (socket) => {
       if (recepientSocketId) {
         io.to(recepientSocketId).emit('receiveMessage', message);
         console.log(`Message sent to ${recepientId}:`, message);
+        console.log(`Emitting message to socket: ${recepientSocketId}`);
       } else {
         console.log(`Recepient ${recepientId} is not online.`);
       }
       //Notify sender of sent message
       socket.emit('messageSent', message);
     } catch (err) {
-      console.error('Error saving message to database:', err);
+      console.error('Error sending message:', err);
       socket.emit('error', 'Error sending message');
     }
+  });
+  socket.on('receiveMessage', (message) => {
+    console.log('Message received:', message);
+    displayMessage(message, 'received');
   });
 
   socket.on('disconnect', () => {

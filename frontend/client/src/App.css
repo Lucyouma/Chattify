@@ -8,6 +8,8 @@
 /* Body section containing the left user list and center chat messages */
 .chat-body {
   display: flex;
+  padding: 0;
+  height: 100%;
   flex: 1; /* Allow the body section to take up all remaining vertical space */
   overflow: hidden; /* Prevent overflow when content exceeds the height */
 }
@@ -15,24 +17,27 @@
 /* Left panel for user selection */
 .user-list {
   width: 250px; /* Fixed width for user list */
-  background-color: #f4f4f4;
-  padding: 10px;
+  background-color: #315d65;
+  padding: 16px;
   overflow-y: auto; /* Scroll if the user list is too long */
 }
 
 /* Center panel for chat messages */
 .chat-main {
-  flex: 1; /* Take up remaining space */
+  flex: 2; /* Take up remaining space */
   display: flex;
   flex-direction: column;
-  background-color: #fff;
+  background-color: #4b8093;
+  box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.1);
   overflow-y: auto; /* Allow chat messages to scroll if needed */
   padding: 10px;
+  overflow: auto;
 }
 
 /* Bottom panel for chat input */
 .chat-input {
   background-color: #f4f4f4;
+  background: linear-gradient(90deg, #005fff, #0066ff);
   padding: 10px;
   display: flex;
   justify-content: space-between;
@@ -42,10 +47,13 @@
 
 /* Message input box styling */
 .message-input {
-  width: 80%; /* Takes up most of the width */
+  width: 100%; /* Takes up most of the width */
   padding: 10px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
+  border: 1px solid #b8c4c2;
+  transition: box-shadow 0.2s ease-in-out;
 }
 
 /* Send button styling */
@@ -56,26 +64,32 @@
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  transition: background 0.3s ease;
 }
-
+.send-button:hover {
+  background: #0066ff; 
+}
 /* Optional styling for file input */
 .file-input {
   margin-right: 10px;
 }
 
-/* Optional styling for chat message display */
+/* Styling for chat message display */
 .chat-messages {
   flex: 1;
   overflow-y: auto;
   padding: 10px;
-  background-color: #fff;
+  background-color: #f9f9f9;
 }
 
 .chat-messages p {
   /* margin: 0; */
-  display: flex;
+  margin: 0;
+  display: inline-block;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
+  padding: 8px 10px;
+  max-width: 60%;
 }
 
 /* Sent and received messages styling */

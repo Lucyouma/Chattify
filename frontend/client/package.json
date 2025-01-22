@@ -8,12 +8,15 @@
     "emoji-picker-react": "^4.12.0",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.473.0",
+    "query": "^0.2.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-emoji": "^0.5.0",
     "react-router-dom": "^7.1.1",
     "react-scripts": "5.0.1",
     "shadcn-ui": "^0.9.4",
     "socket.io-client": "^4.8.1",
+    "string": "^3.3.3",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

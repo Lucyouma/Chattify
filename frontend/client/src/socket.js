@@ -47,12 +47,13 @@ const sendMessage = (message, recepientId, senderId) => {
   try {
     //prepare payload
     const payload = {
-      senderId,
-      recepientId,
+      senderId: message.senderId,
+      recepientId: message.receiverId,
       content: message.content || '',
       file: message.file || null,
       timestamp: message.timestamp || new Date().toISOString(),
     };
+    console.log('The message is', message);
     console.log('Sending payload', payload);
 
     socket.emit('sendMessage', payload);

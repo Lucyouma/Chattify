@@ -226,6 +226,8 @@ app.use((req, res, next) => {
 
 //initialize activeUsers map
 const activeUsers = new Map();
+//initialize pendine messages map
+const pendingMessages = new Map();
 
 // Socket.io events
 io.on('connection', (socket) => {
@@ -237,8 +239,21 @@ io.on('connection', (socket) => {
       console.error('registeruser called without userid');
       return;
     }
+    console.log('Setting the active users');
     activeUsers.set(userId, socket.id);
     console.log(`User registered: ${userId} -> ${socket.id}`);
+    console.log('Current active users:', [...activeUsers.entries()]);
+
+    if (pendingMessages.has(userId)) {
+      const messages = pendingMessages.get(userId);
+      console.log(
+        `delivering ${messages.length} pending messages to ${userId}.`,
+      );
+      messages.forEach((message) => {
+        io.to(socket.id).emit('receiveMessage', message);
+      });
+      pendingMessages.delete(userId);
+    }
   });
 
   // Join a chat room
@@ -261,8 +276,9 @@ io.on('connection', (socket) => {
       ([id, sid]) => sid === socket.id,
     )?.[0];
     if (!senderId) {
-      console.error('Sender not found for socket:', socket.id);
-      socket.emit('error', 'Sender not registered');
+      console.log('content of activeusers is', activeUsers.entries());
+      console.error('Senderer not found for socket:', socket.id);
+      socket.emit('error', 'Senderer not registered');
       return;
     }
 
@@ -286,7 +302,14 @@ io.on('connection', (socket) => {
         console.log(`Message sent to ${recepientId}:`, message);
         console.log(`Emitting message to socket: ${recepientSocketId}`);
       } else {
-        console.log(`Recepient ${recepientId} is not online.`);
+        //recepient is offline
+        console.log(
+          `Recepient ${recepientId} is not online. message will be delivered once they are online`,
+        );
+        if (!pendingMessages.has(recepientId)) {
+          pendingMessages.set(recepientId, []);
+        }
+        pendingMessages.get(recepientId).push(message);
       }
       //Notify sender of sent message
       socket.emit('messageSent', message);

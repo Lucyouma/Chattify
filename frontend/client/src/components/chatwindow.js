@@ -53,12 +53,7 @@ const ChatWindow = ({
                 key={msg._id || `${msg.senderId}-${msg.timestamp}-${index}`}
                 className={msg.senderId === userId ? 'sent' : 'received'}
               >
-                {/* <p>{msg.content}</p> */}
-                {msg.content ? (
-                  <p className='message-content'>{msg.content}</p>
-                ) : (
-                  <p className='message-placeholder'>No content available</p>
-                )}
+                <p>{msg.content}</p>
                 {/* Display media attachments if present */}
                 {msg.multimedia && (
                   <div className='chat-media'>

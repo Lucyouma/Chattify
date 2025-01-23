@@ -1,5 +1,7 @@
 # **Chattify**
 Chattify is a feature-rich chat application that enables real-time communication. The app offers functionalities such as messaging, multimedia sharing, user authentication, and threaded conversations. This README file provides a detailed explanation of my project, including how to set it up, the purpose of each function, and how it works. 
+
+![My Image] (http://localhost:3000/)
 ________________________________________
 # **Contents**
 	Features

@@ -19,8 +19,9 @@
   flex-direction: column;
   height: 90vh;
 }
+
 .App-header {
-  background-color: #4a4e69;
+  background: linear-gradient(to right, #2575fc, #6a11cb); /* Blue to Purple gradient */
   color: #fff;
   display: flex;
   justify-content: space-between;
@@ -28,38 +29,229 @@
   padding: 10px 20px;
 }
 
-/* Overall container, full viewport height */
+/* Landing page styling */
+.landing-page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  background-color: #f0f0f0fd;
+  text-align: center;
+}
+
+.landing-page h1 {
+  font-size: 2.5rem;
+  color: #4a4e69;
+  margin-bottom: 20px;
+}
+
+.landing-page p {
+  font-size: 1.2rem;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.landing-page button {
+  padding: 15px 30px;
+  font-size: 1rem;
+  color: #000000;
+  background-color: #4caf50;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.landing-page button:hover {
+  background-color: #3b8b3b;
+}
+
+/* Chat container styling */
 .chat-container {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  height: 100vh; /* Full viewport height */
+  height: 100vh;
   background-color: #f5f5f5;
-  /* background-color: black; */
 }
 
-/* Body section containing the left user list and center chat messages */
+/* Landing Page container */
+.LandingPage {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #000000; /* Solid black background */
+  color: #333; /* Dark text color for better contrast */
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Center content in the container */
+.LandingPage .container {
+  max-width: 600px;
+  margin: auto;
+  text-align: center;
+  background: linear-gradient(to right, #ffffff, #2575fc); /* White to Blue gradient */
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Title and tagline */
+.LandingPage h1 {
+  font-size: 3rem;
+  color: #075e54; /* Green color */
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+.LandingPage h2 {
+  font-size: 1.5rem;
+  color: #555;
+  margin-bottom: 40px;
+  font-weight: 400;
+}
+
+/* Form container */
+.login-register-container {
+  background-color: #f7f7f7; /* Light gray background for form */
+  padding: 12px;
+  border-radius: 4px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  margin-top: 20px;
+}
+
+/* Style for the login/register form */
+.login-register-container input,
+.login-register-container button {
+  width: 100%;
+  padding: 14px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  border: 1px solid #355079;
+  background-color: #1d3362; /* Light blue background for input */
+  color: #333;
+  font-size: 1rem;
+  transition: all 0.3s ease-in-out;
+}
+
+/* Focus state for input and button */
+.login-register-container input:focus,
+.login-register-container button:focus {
+  outline: none;
+  border-color: #075e54; /* WhatsApp's primary green */
+  box-shadow: 0 0 5px rgba(7, 94, 84, 0.5); /* Subtle shadow on focus */
+}
+
+/* Button styling for login/register toggle */
+.login-register-container button {
+  background-color: #075e54; /* Primary green */
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.login-register-container button:hover {
+  background-color: #128c7e; /* Secondary green for hover */
+}
+
+.login-register-container button:active {
+  background-color: #075e54; /* Darker green on button click */
+}
+
+/* Styling for Remember Me Checkbox */
+.login-register-container label {
+  font-size: 0.875rem;
+  color: #555;
+  margin-top: 12px;
+}
+
+.login-register-container .checkbox {
+  margin-right: 8px;
+}
+
+/* Text link for switching between login/register forms */
+.login-register-container .text-center {
+  margin-top: 20px;
+}
+
+.login-register-container .text-center a {
+  color: #075e54; /* Green link */
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.login-register-container .text-center a:hover {
+  text-decoration: underline;
+}
+
+/* Mobile responsiveness for smaller screens */
+@media (max-width: 600px) {
+  .LandingPage .container {
+    padding: 20px;
+  }
+
+  .LandingPage h1 {
+    font-size: 2.5rem;
+  }
+
+  .LandingPage h2 {
+    font-size: 1.25rem;
+  }
+
+  .login-register-container {
+    padding: 25px;
+  }
+}
+
+/* Header at the top of the chat section */
+.chat-header {
+  padding: 15px 30px;
+  font-family: Helvetica Neue, sans-serif;
+  font-weight: bold;
+  font-size: 18px;
+  background-color: #4a4e69;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center; 
+}
+
 .chat-body {
   display: flex;
-  flex: 1; /* Allow the body section to take up all remaining vertical space */
-  /* overflow: hidden; /* Prevent overflow when content exceeds the height */
-  overflow-y: scroll;
+  flex: 1;
+  padding: 15px;
+  background: #e9eff5; /* Match track to background */
+  border-radius: 4px; /* Rounded edges */
+  overflow-y: auto;
+  gap: 10px; /* Add space between messages */
+  border-left: 1px solid #d1d1d1; /* Subtle border to mimic Twitter's clean lines */
+  scrollbar-color: #b0bec5 #e9eff5; /* Match scrollbar to the theme */
+  scrollbar-width: thin; /* Thin scrollbar for modern look */
 }
 
-/* Left panel for user selection */
 .user-list {
-  width: 350px; /* Fixed width for user list */
-  background-color: #f4f4f4;
+  width: 350px;
+  background-color: #f1f1f1;
   padding: 10px;
-  overflow-y: auto; /* Scroll if the user list is too long */
+  overflow-y: auto;
 }
-/*new code */
 
-/*cut here*/
-/* Bottom panel for chat input */
+.user-list .user-item {
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.user-list .user-item:hover {
+  background-color: #262770; /* Highlight effect */
+}
+
 .chat-input {
   background-color: #f4f4f4;
-
   padding: 10px;
   display: flex;
   justify-content: space-between;
@@ -69,25 +261,22 @@
 
 .message-input input {
   flex-grow: 1;
-  padding: 10px;
+  display: flex;
+  padding: 0.75;
   border: 1px solid #ccc;
   border-radius: 20px;
   margin-right: 10px;
-  background-color: black;
 }
-/* Message input box styling */
+
 .message-input {
-  width: 80%; /* Takes up most of the width */
+  width: 80%;
   display: flex;
   padding: 10px;
   border-radius: 5px;
   border: 1px solid #ccc;
-  border-top: 1px solid #ccc;
   background-color: #fff;
-  /* background-color: black; */
 }
 
-/* Send button styling */
 .send-button {
   background-color: #4caf50;
   color: white;
@@ -96,80 +285,66 @@
   border-radius: 50px;
   cursor: pointer;
 }
-.send-input button:hover {
-  background-color: #001a4d; /* Hover color */
+
+.send-button:hover {
+  background-color: #3b8b3b;
 }
 
-/* Optional styling for file input */
 .file-input {
   margin-right: 10px;
+  background-color: transparent;
+  color: #007bff;
+  border: none;
+  font-size: 1.0rem;
+  cursor: pointer;
+  transition: color 0.3s ease;
 }
 
-/* Optional styling for chat message display */
+.attachment-button:hover {
+  color: #0056b3;
+}
+
 .chat-messages {
   flex: 1;
   overflow-y: scroll;
   padding: 20px 30px;
   background-color: #fff;
-
   gap: 20px;
+  outline: none;
   justify-content: space-around;
   flex-wrap: wrap;
   min-height: 40vw;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease;
 }
 
 .chat-messages p {
-  /* margin: 0; */
   display: flex;
   flex-direction: column;
   justify-content: space-around;
-  /* justify-content: space-between; */
-  column-gap: 50px;
-  /* margin: 30px; */
   padding: 15px;
-
-  border-bottom: 30px;
-  padding-inline: 10px;
   border-radius: 20px;
 }
 
-/* Sent and received messages styling */
 .sent {
   text-align: right;
   background-color: #dcf8c6;
-  min-height: 2vw;
-
   padding: 15px;
-
   border-radius: 100px;
   max-width: 60%;
   overflow-wrap: anywhere;
   margin-left: auto;
   border-bottom-right-radius: 0;
-  border-bottom: 40px;
 }
 
 .received {
   text-align: left;
   background-color: #ececec;
   padding: 15px;
-  min-height: 2vw;
-
   border-radius: 100px;
   max-width: 60%;
   overflow-wrap: anywhere;
-
   border-bottom-left-radius: 0;
-}
-
-/* hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh */
-#chat2 .form-control {
-  border-color: transparent;
-}
-
-#chat2 .form-control:focus {
-  border-color: transparent;
-  box-shadow: inset 0px 0px 0px 1px transparent;
 }
 
 .divider:after,
@@ -178,4 +353,10 @@
   flex: 1;
   height: 1px;
   background: #eee;
+}
+
+.divider span {
+  padding: 0 10px;
+  color: #888;
+  font-size: 14px;
 }

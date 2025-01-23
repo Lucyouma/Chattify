@@ -1,29 +1,16 @@
-
-import React from 'react';
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  Link,
-  Navigate,
-} from 'react-router-dom';
-
 import React, { useState, useEffect } from 'react'; // React hooks
-import { useNavigate } from 'react-router-dom'; // Hook to navigate between pages
-import { Routes, Route, Link, Navigate } from 'react-router-dom'; // Import Routes, Route for navigation
-
+import { useNavigate, Routes, Route, Link, Navigate } from 'react-router-dom'; // Importing routing hooks and components
 import Chat from './components/Chat'; // Import Chat component
 import LoginForm from './components/LoginForm'; // Import LoginForm component
 import RegisterForm from './components/RegisterForm'; // Import RegisterForm component
 import './App.css'; // Import your CSS file
 
-import Navbar from './components/Navbar';
-
 import { Home, Mail, User, Settings, LogOut } from 'lucide-react'; // Import sidebar icons
 
 // Landing Page Component (for login/register)
 const LandingPage = () => {
-  const [showLogin, setShowLogin] = useState(false); // State to toggle between login and register forms
+  const [showLogin, setShowLogin] = useState(true); // State to toggle between login and register forms
+  const [rememberMe, setRememberMe] = useState(false); // State for "Remember Me" checkbox
   const navigate = useNavigate(); // Hook for programmatic navigation
 
   // Check if the user is already authenticated, if so, redirect to '/chat'
@@ -35,6 +22,7 @@ const LandingPage = () => {
 
   const handleLoginSuccess = () => {
     sessionStorage.setItem('isAuthenticated', 'true'); // Store authentication status in session
+    if (rememberMe) localStorage.setItem('rememberMe', 'true');
     navigate('/chat'); // Redirect to the chat page after login
   };
 
@@ -49,7 +37,7 @@ const LandingPage = () => {
 
   // Render the login or register form
   return (
-    <div className='min-h-screen bg-gray-900 text-white'>
+    <div className='LandingPage min-h-screen bg-gray-900 text-white'>
       <div className='container mx-auto px-4 py-16'>
         <div className='max-w-4xl mx-auto'>
           <div className='text-center mb-12'>
@@ -66,13 +54,26 @@ const LandingPage = () => {
               <RegisterForm onRegistrationSuccess={handleRegistrationSuccess} />
             )}
 
+            {/* Remember Me Checkbox */}
+            <div className='mt-4'>
+              <label className='flex items-center text-sm'>
+                <input
+                  type='checkbox'
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className='mr-2'
+                />
+                Remember Me
+              </label>
+            </div>
+
             <div className='mt-4 text-center'>
               <button
                 onClick={() => setShowLogin(!showLogin)} // Toggle between login and register
                 className='text-blue-400 hover:text-blue-300 hover:underline'
               >
                 {showLogin
-                  ? 'Need an account? Register'
+                  ? "Don't have an account? Register"
                   : 'Already have an account? Login'}
               </button>
             </div>
@@ -100,94 +101,77 @@ const ChatLayout = () => {
     navigate('/'); // Navigate to home page
   };
 
-
   return (
+    <div className='App'>
+      <header className='App-header'>
+        <h1 className='text-xl font-bold text-white mb-6'>Chattify</h1>
+        {/* Navigation Links */}
+        <nav>
+          <ul className='nav-links'>
+            <li>
+              <Link to='/login'>Login</Link>
+            </li>
+            <li>
+              <Link to='/register'>Register</Link>
+            </li>
+            <li>
+              <Link to='/chat'>Chat</Link>
+            </li>
+          </ul>
+        </nav>
+      </header>
 
-    <Router>
-      <div className='App'>
-        <header className='App-header'>
-          <h1>Chattify</h1>
-          <p>Your Ones-Stop Solution For Seamless Communication</p>
-          {/* Navigation Links */}
-          <nav>
-            <ul className='nav-links'>
-              <li>
-                <Link to='/login'>Login</Link>
-              </li>
-              <li>
-                <Link to='/register'>Register</Link>
-              </li>
-              <li>
-                <Link to='/chat'>Chat</Link>
-              </li>
-            </ul>
-          </nav>
-        </header>
-
-        {/* Main Content Area */}
-        <div className='main-content'>
-          <Routes>
-            {/* Define Routes for each page */}
-            <Route path='/' element={<Navigate to='/login' />} />{' '}
-            {/* Default Route */}
-            <Route path='/login' element={<LoginForm />} />
-            <Route path='/register' element={<RegisterForm />} />
-            <Route path='/chat' element={<Chat />} />
-            {/* Fallback Route */}
-            <Route path='*' element={<h2>Page Not Found</h2>} />
-          </Routes>
-
-    <div className='flex min-h-screen bg-gray-900'>
-      {/* Sidebar */}
-      <div className='fixed h-screen w-64 bg-gray-800 border-r border-gray-700'>
-        <div className='p-4'>
-          <h1 className='text-xl font-bold text-white mb-6'>Chattify</h1>
-          <nav className='space-y-2'>
-            {/* Sidebar Links */}
-            <Link
-              to='/'
-              className='flex items-center space-x-3 p-3 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg transition-colors'
-            >
-              <Home className='w-5 h-5' />
-              <span>Home</span>
-            </Link>
-            <Link
-              to='/messages'
-              className='flex items-center space-x-3 p-3 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg transition-colors'
-            >
-              <Mail className='w-5 h-5' />
-              <span>Messages</span>
-            </Link>
-            <Link
-              to='/profile'
-              className='flex items-center space-x-3 p-3 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg transition-colors'
-            >
-              <User className='w-5 h-5' />
-              <span>Profile</span>
-            </Link>
-            <Link
-              to='/settings'
-              className='flex items-center space-x-3 p-3 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg transition-colors'
-            >
-              <Settings className='w-5 h-5' />
-              <span>Settings</span>
-            </Link>
-            <button
-              onClick={handleLogout} // Logout button handler
-              className='flex items-center space-x-3 p-3 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg transition-colors w-full'
-            >
-              <LogOut className='w-5 h-5' />
-              <span>Logout</span>
-            </button>
-          </nav>
-
+      {/* Main Content Area */}
+      <div className='flex min-h-screen bg-gray-900'>
+        {/* Sidebar */}
+        <div className='fixed h-screen w-64 bg-gray-800 border-r border-gray-700'>
+          <div className='p-4'>
+            <nav className='space-y-2'>
+              {/* Sidebar Links */}
+              <Link
+                to='/'
+                className='flex items-center space-x-3 p-3 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg transition-colors'
+              >
+                <Home className='w-5 h-5' />
+                <span>Home</span>
+              </Link>
+              <Link
+                to='/messages'
+                className='flex items-center space-x-3 p-3 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg transition-colors'
+              >
+                <Mail className='w-5 h-5' />
+                <span>Messages</span>
+              </Link>
+              <Link
+                to='/profile'
+                className='flex items-center space-x-3 p-3 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg transition-colors'
+              >
+                <User className='w-5 h-5' />
+                <span>Profile</span>
+              </Link>
+              <Link
+                to='/settings'
+                className='flex items-center space-x-3 p-3 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg transition-colors'
+              >
+                <Settings className='w-5 h-5' />
+                <span>Settings</span>
+              </Link>
+              <button
+                onClick={handleLogout} // Logout button handler
+                className='flex items-center space-x-3 p-3 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg transition-colors w-full'
+              >
+                <LogOut className='w-5 h-5' />
+                <span>Logout</span>
+              </button>
+            </nav>
+          </div>
         </div>
-      </div>
 
-      {/* Main Content (Chat Section) */}
-      <div className='flex-1 ml-64'>
-        <div className='h-full bg-gray-900'>
-          <Chat />
+        {/* Main Content (Chat Section) */}
+        <div className='flex-1 ml-64'>
+          <div className='h-full bg-gray-900'>
+            <Chat /> {/* Chat Component */}
+          </div>
         </div>
       </div>
     </div>
@@ -197,47 +181,49 @@ const ChatLayout = () => {
 // Main App Component (handles all routes)
 const App = () => {
   return (
-    <Routes>
-      {/* Landing Page */}
-      <Route path='/' element={<LandingPage />} />
+    <div>
+      <Routes>
+        {/* Landing Page */}
+        <Route path='/' element={<LandingPage />} />
 
-      {/* Protected Routes */}
-      <Route
-        path='/chat'
-        element={
-          <ProtectedRoute>
-            <ChatLayout />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path='/messages'
-        element={
-          <ProtectedRoute>
-            <ChatLayout />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path='/profile'
-        element={
-          <ProtectedRoute>
-            <ChatLayout />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path='/settings'
-        element={
-          <ProtectedRoute>
-            <ChatLayout />
-          </ProtectedRoute>
-        }
-      />
+        {/* Protected Routes */}
+        <Route
+          path='/chat'
+          element={
+            <ProtectedRoute>
+              <ChatLayout />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/messages'
+          element={
+            <ProtectedRoute>
+              <ChatLayout />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/profile'
+          element={
+            <ProtectedRoute>
+              <ChatLayout />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/settings'
+          element={
+            <ProtectedRoute>
+              <ChatLayout />
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Wildcard Route */}
-      <Route path='*' element={<Navigate to='/' />} />
-    </Routes>
+        {/* Wildcard Route */}
+        <Route path='*' element={<Navigate to='/' />} />
+      </Routes>
+    </div>
   );
 };
 
